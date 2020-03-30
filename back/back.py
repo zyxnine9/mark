@@ -41,13 +41,13 @@ def post_num():
     return jsonify({"ids":id_lst,"images":img_lst})
 
 
-@app.route("/retrain", methods=['POST','get'])
+@app.route("/retrain", methods=['POST','GET'])
 def retrain():
-    ids = request.request.get_json()['ids']
-    labels = request.request.get_json()['labels']
+    ids = request.get_json()['ids']
+    labels = request.get_json()['labels']
     # def retrain()这里应该是一个finetune重新训练的函数，随便示例一下
     #返回主页面
-    return render_template('/')
+    return jsonify({'msg':'OK'})
 
 
 

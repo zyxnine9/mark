@@ -21,12 +21,14 @@ export default {
   methods: {
     getNumber() {
       if (this.value) {
-        axios.post("http://127.0.0.1:5000/post",{'value':this.value}).then(e=>{
-          if(e.data){
-            console.log(e.data)
-            this.$router.push({name:"Mark",params:e.data})
-          }
-        })
+        axios
+          .post("http://127.0.0.1:5000/post", { value: this.value })
+          .then(e => {
+            if (e.data) {
+              console.log(e.data);
+              this.$router.push({ name: "Mark", params: e.data });
+            }
+          });
       } else {
         this.$message({
           message: "请选择标注张数",

@@ -1,32 +1,102 @@
 <template>
   <div>
-    <el-carousel 
-    :autoplay="false"
-    :loop="false"  
-    indicator-position="none" 
-    ref="ques">
+    <el-carousel
+      :autoplay="false"
+      :loop="false"
+      arrow="never"
+      indicator-position="none"
+      height="80vh"
+      ref="ques"
+    >
       <el-carousel-item v-for="img in images" :key="img">
         <img v-bind:src="'data:image/jpeg;base64,'+img" />
       </el-carousel-item>
     </el-carousel>
+    <el-select v-model="labels[index]" placeholder="请选择">
+      <el-option v-for="item in options" :key="item" :label="item" :value="item"></el-option>
+    </el-select>
+    <el-row>
+      <el-col :span="12">
+        <el-button v-if="index" type="primary" @click="toPrev">上一个</el-button>
+      </el-col>
+      <el-col :span="12">
+        <el-button type="primary" @click="submit">{{nextButton}}</el-button>
+      </el-col>
+    </el-row>
   </div>
 </template>
 
 <script>
+import axios from "axios";
 export default {
   name: "",
   data() {
     return {
-      images: []
+      images: [],
+      labels: [],
+      ids: [],
+      options: [1, 2, 3, 4],
+      index: 0,
+      nextButton: "下一个"
     };
   },
-  computed:{
-    imgs(){
-      console.log(this.images)
-      return this.images.map(e=>"http://localhost:5000/image/"+e)
+  computed: {
+    imgs() {
+      console.log(this.images);
+      return this.images.map(e => "http://localhost:5000/image/" + e);
+    }
+  },
+  methods: {
+    toNext() {
+      this.index++;
+      console.log(this.index);
+      console.log(this.images.length - 1);
+      if (this.canPost()) {
+        this.nextButton = "提交";
+      }
+      this.$refs.ques.next();
+    },
+    toPrev() {
+      this.index--;
+      if (!this.canPost()) {
+        this.nextButton = "下一个";
+      }
+      this.$refs.ques.prev();
+    },
+    canToNextPage() {
+      return this.labels[this.index] && this.index < this.images.length - 1;
+    },
+    canPost() {
+      return this.index == this.images.length - 1;
+    },
+    submit() {
+      console.log("canToNextPage  " + this.canToNextPage());
+      if (this.canToNextPage()) {
+        this.toNext();
+      } else if (this.canPost()) {
+        axios
+          .post("http://127.0.0.1:5000/retrain", {
+            ids: this.ids,
+            labels: this.labels
+          })
+          .then(res => {
+            console.log(res);
+          })
+          .catch(error => {
+            console.log(error);
+          });
+
+        console.log();
+      } else {
+        this.$message({
+          message: "请标注",
+          type: "warning"
+        });
+      }
     }
   },
   created() {
+    this.ids = this.$route.params.ids;
     this.images = this.$route.params.images;
   }
 };
