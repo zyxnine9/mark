@@ -1,14 +1,12 @@
 <template>
   <div>
-    this is mark
-    {{imgs}}
     <el-carousel 
     :autoplay="false"
     :loop="false"  
     indicator-position="none" 
     ref="ques">
-      <el-carousel-item v-for="img in imgs" :key="img">
-        <img :src=img alt="">
+      <el-carousel-item v-for="img in images" :key="img">
+        <img v-bind:src="'data:image/jpeg;base64,'+img" />
       </el-carousel-item>
     </el-carousel>
   </div>
