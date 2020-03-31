@@ -6,16 +6,25 @@
 </template>
 
 <script>
+    import axios from "axios";
+
     export default {
         name: '',
         data() {
             return {
-                
             }
         },
         methods:{
-            train(){
-                this.$router.push('/home')
+            train() {
+                axios
+                    .post("http://127.0.0.1:5000/train", {})
+                    .then(res => {
+                        console.log(res);
+                        this.$router.push("/home");
+                    })
+                    .catch(error => {
+                        console.log(error);
+                    });
             }
         }
     }
