@@ -73,10 +73,10 @@ export default {
       this.$refs.ques.prev();
     },
     canToNextPage() {
-      return this.labels[this.index] && this.index < this.images.length - 1;
+      return (this.labels[this.index] != undefined) && this.index < this.images.length - 1;
     },
     canPost() {
-      return this.labels[this.index] && this.index == this.images.length - 1;
+      return (this.labels[this.index] != undefined) && this.index == this.images.length - 1;
     },
     submit() {
       console.log("canToNextPage  " + this.canToNextPage());
@@ -101,7 +101,7 @@ export default {
         })
         .then(res => {
           console.log(res);
-          this.$router.push("/home");
+          this.$router.push("/train");
         })
         .catch(error => {
           console.log(error);
