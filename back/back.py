@@ -11,11 +11,6 @@ app = Flask(__name__)
 CORS(app)
 
 
-@app.route("/image/<imageid>")
-def index(imageid):
-    image = open("./{}".format(imageid),"rb").read()
-    resp = Response(image, mimetype="image/png")
-    return resp
 # from flask import render_template, jsoçnify
 
 @app.route("/get")
@@ -36,8 +31,6 @@ def post_num():
         fig.savefig(sio, format='png')
         img_base64 = base64.b64encode(sio.getvalue()).decode('utf8')
         img_lst.append(img_base64)
-    # 这种编码访问路径是src = "data:image/jpeg;base64,{{ img_lst[0] }}“
-    # 用别的编码也行，无所谓的
     return jsonify({"ids":id_lst,"images":img_lst})
 
 
@@ -45,6 +38,8 @@ def post_num():
 def retrain():
     ids = request.get_json()['ids']
     labels = request.get_json()['labels']
+    print(ids)
+    print(labels)
     # def retrain()这里应该是一个finetune重新训练的函数，随便示例一下
     #返回主页面
     return jsonify({'msg':'OK'})

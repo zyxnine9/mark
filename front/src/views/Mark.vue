@@ -13,7 +13,7 @@
       </el-carousel-item>
     </el-carousel>
     <el-select v-model="labels[index]" placeholder="请选择">
-      <el-option v-for="item in options" :key="item" :label="item" :value="item"></el-option>
+      <el-option v-for="(item, index) in options" :key="item" :value="index" :label="item">{{item}}</el-option>
     </el-select>
     <el-row>
       <el-col :span="12">
@@ -35,7 +35,7 @@ export default {
       images: [],
       labels: [],
       ids: [],
-      options: [1, 2, 3, 4],
+      options:['Active','Rest','Noisy','Unknown'],
       index: 0,
       nextButton: "下一个"
     };
