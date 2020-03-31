@@ -24,7 +24,7 @@
       </el-col>
     </el-row>
 
-    <el-dialog title="提示" :visible.sync="dialogVisible" width="30%" :before-close="handleClose">
+    <el-dialog title="提示" :visible.sync="dialogVisible" width="30%">
       <span>这是一段信息</span>
       <span slot="footer" class="dialog-footer">
         <el-button @click="dialogVisible = false">取 消</el-button>
@@ -60,14 +60,14 @@ export default {
       this.index++;
       console.log(this.index);
       console.log(this.images.length - 1);
-      if (this.canPost()) {
+      if (this.index == this.images.length - 1) {
         this.nextButton = "提交";
       }
       this.$refs.ques.next();
     },
     toPrev() {
       this.index--;
-      if (!this.canPost()) {
+      if (!this.index == this.images.length - 1) {
         this.nextButton = "下一个";
       }
       this.$refs.ques.prev();
@@ -76,10 +76,11 @@ export default {
       return this.labels[this.index] && this.index < this.images.length - 1;
     },
     canPost() {
-      return this.index == this.images.length - 1;
+      return this.labels[this.index] && this.index == this.images.length - 1;
     },
     submit() {
       console.log("canToNextPage  " + this.canToNextPage());
+      
       if (this.canToNextPage()) {
         this.toNext();
       } else if (this.canPost()) {
