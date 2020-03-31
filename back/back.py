@@ -13,7 +13,7 @@ CORS(app)
 
 # from flask import render_template, jsoçnify
 
-@app.route("/train")
+@app.route("/train",methods=['POST'])
 def train():
     return jsonify({"a":"123","b":"445"})
 
