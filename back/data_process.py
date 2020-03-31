@@ -10,7 +10,7 @@ from sklearn.model_selection import train_test_split
 label_name = {0: 'Activate', 1: 'Rest', 2: 'Noisy', 3: 'Unknown'}
 train_has_label = [1, 10, 11, 12, 13, 14, 15, 16]
 
-path = "../2020MAR-EMG Labeling Data/labeling.h5"
+path = "../../2020MAR-EMG Labeling Data/labeling.h5"
 index = 0
 
 
