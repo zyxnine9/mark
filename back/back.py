@@ -13,8 +13,8 @@ CORS(app)
 
 # from flask import render_template, jsoçnify
 
-@app.route("/get")
-def json():
+@app.route("/train")
+def train():
     return jsonify({"a":"123","b":"445"})
 
 @app.route("/post", methods=['POST','GET'])
@@ -40,8 +40,6 @@ def retrain():
     labels = request.get_json()['labels']
     print(ids)
     print(labels)
-    # def retrain()这里应该是一个finetune重新训练的函数，随便示例一下
-    #返回主页面
     return jsonify({'msg':'OK'})
 
 
