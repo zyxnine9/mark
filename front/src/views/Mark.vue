@@ -23,6 +23,14 @@
         <el-button type="primary" @click="submit">{{nextButton}}</el-button>
       </el-col>
     </el-row>
+
+    <el-dialog title="提示" :visible.sync="dialogVisible" width="30%" :before-close="handleClose">
+      <span>这是一段信息</span>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="dialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="postData">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -35,9 +43,10 @@ export default {
       images: [],
       labels: [],
       ids: [],
-      options:['Active','Rest','Noisy','Unknown'],
+      options: ["Active", "Rest", "Noisy", "Unknown"],
       index: 0,
-      nextButton: "下一个"
+      nextButton: "下一个",
+      dialogVisible: false
     };
   },
   computed: {
@@ -74,25 +83,28 @@ export default {
       if (this.canToNextPage()) {
         this.toNext();
       } else if (this.canPost()) {
-        axios
-          .post("http://127.0.0.1:5000/retrain", {
-            ids: this.ids,
-            labels: this.labels
-          })
-          .then(res => {
-            console.log(res);
-          })
-          .catch(error => {
-            console.log(error);
-          });
-
-        console.log();
+        this.dialogVisible = true;
+        // this.postData();
       } else {
         this.$message({
           message: "请标注",
           type: "warning"
         });
       }
+    },
+    postData() {
+      axios
+        .post("http://127.0.0.1:5000/retrain", {
+          ids: this.ids,
+          labels: this.labels
+        })
+        .then(res => {
+          console.log(res);
+          this.$router.push("/home");
+        })
+        .catch(error => {
+          console.log(error);
+        });
     }
   },
   created() {
