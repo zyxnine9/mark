@@ -116,7 +116,7 @@ def train(train_data, X_test, y_test, epoch = 10):
 
 def test(X, y, model):
     X_test, y_test = torch.Tensor(X), torch.Tensor(y)
-
+    model.eval()
     predict = model(Variable(X_test))
 
     acc = np.mean((torch.argmax(predict, -1) == y_test[:, 0]).numpy())
@@ -131,6 +131,11 @@ def entropy(out, X):
         entropy_signal = 0
         for j in range(4):
             entropy_signal += torch.log(out[i][j])
-        pre_entropy.append([float(entropy_signal), float(X[i][0][-1])])
+        pre_entropy.append([float(entropy_signal), float(torch.argmax(out[i], -1)), float(X[i][0][-1])])
 
     return pre_entropy
+
+
+def load_model(model, path):
+    model.load_state_dict(torch.load(path))
+    return model
