@@ -25,7 +25,6 @@ def load_data_to_train(path):
     raw_datas = []
     labels = []
     for title in f:
-
         for group in f[title]:
             for train in f[title][group]:
                 for signal_num in f[title][group][train]:
@@ -49,6 +48,7 @@ def load_data_to_train(path):
                     datas.append(fftdata)
                     index += 1
             break
+
 
     datas_butter = []
     # raw_datas_butter = []

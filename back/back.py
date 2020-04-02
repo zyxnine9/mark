@@ -13,13 +13,15 @@ import network
 app = Flask(__name__)
 CORS(app)
 path = "../../2020MAR-EMG Labeling Data/labeling.h5"
-
+validation_standard = 0
 pre_entropy = []
 
 datas, raw_datas, labels, datas_butter, X_train, X_test, y_train, y_test = data_process.load_data_to_train(path)
-print(X_test[0][0][-1])
+X_train, X_pool, y_train, y_pool = data_process.train_test_split(X_train, y_train, test_size=0.5, random_state=42)
+print(X_pool.shape)
 model = CNN1d()
-model = load_model(model, 'models/parameter28.pkl')
+model = load_model(model, 'models/little_parameter.pkl')
+model = model.cuda()
 
 
 # from flask import render_template, jsoçnify
@@ -29,10 +31,23 @@ model = load_model(model, 'models/parameter28.pkl')
 def train():
     global pre_entropy
     print(X_test.shape)
-    predict, acc = network.test(X_test, y_test, model)
-    pre_entropy = entropy(predict, X_test)
+
+    _, acc = network.test(X_test, y_test, model)
+    global validation_standard
+    validation_standard = acc
+    print(acc)
+
+    predict = torch.ones([1, 4])
+    print(X_pool.shape[0])
+    for i in range(0, X_pool.shape[0], 16):
+        if i + 16 < X_pool.shape[0]:
+            tmp_predict, _ = network.test(X_pool[i:i + 16], y_pool[i:i + 16], model)
+        else:
+            tmp_predict, _ = network.test(X_pool[i:], y_pool[i:], model)
+        predict = torch.cat((predict, tmp_predict), dim=0)
+    # predict, _ = network.test(X_pool, y_pool, model)
+    pre_entropy = entropy(predict[1:], X_pool)
     pre_entropy.sort(key=data_process.takeFirst, reverse=True)
-    print(pre_entropy)
     return jsonify({"a":"123","b":"445"})
 
 
@@ -43,9 +58,9 @@ def post_num():
     img_lst = []
     id_lst= []
     global pre_entropy
-    global X_test, X_train, y_test, y_train
+    global X_pool, X_train, y_pool, y_train
     print(datas.shape)
-    print(X_test.shape)
+    print(X_pool.shape)
     for i in range(int(num)):
         for signal_num in range(len(datas)):
             if int(pre_entropy[i][-1]) == int(datas[signal_num][-1]):
@@ -54,16 +69,19 @@ def post_num():
                 # y = filtedData[x]
                 y_fft = datas[signal_num][x]
                 y_raw = raw_datas[signal_num][0][x]
-                fig = plt.figure(1, figsize=(10, 5))
-                plt.subplot(121)
+                fig = plt.figure(1, figsize=(15, 5))
+                plt.subplot(131)
                 plt.cla()
                 plt.ylim(ymax=0.005)
                 plt.title(data_process.label_name[labels[signal_num][0]])
                 plt.plot(x, y_fft)
-                plt.subplot(122)
+                plt.subplot(132)
                 plt.cla()
                 plt.title(data_process.label_name[labels[signal_num][0]])
                 plt.plot(x, y_raw)
+                plt.subplot(133)
+                plt.cla()
+                plt.bar([0, 1, 2, 3], pre_entropy[i][-2])
                 sio = BytesIO()
                 fig.savefig(sio, format='png')
                 img_base64 = base64.b64encode(sio.getvalue()).decode('utf8')
@@ -80,8 +98,8 @@ def post_num():
                 print(tmp_label.shape)
                 X_train = np.append(X_train, tmp_data, axis=0)
                 y_train = np.append(y_train, tmp_label, axis=0)
-                y_test = np.delete(y_test, signal_num, axis=0)
-                X_test = np.delete(X_test, signal_num, axis=0)
+                y_pool = np.delete(y_test, signal_num, axis=0)
+                X_pool = np.delete(X_test, signal_num, axis=0)
 
                 break
     return jsonify({"ids":id_lst,"images":img_lst})
@@ -95,9 +113,11 @@ def retrain():
     print(ids)
     print(labels)
     print(X_train.shape)
+    global model, validation_standard
+    train_data = train_and_label_process(X_train[:, :, :-1], y_train[:, :-1])
+    model = re_train_model(train_data, X_test, y_test, model, 5, validation_standard)
+
     return jsonify({'msg':'OK'})
-
-
 
 
 @app.route('/test')
