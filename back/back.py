@@ -74,10 +74,12 @@ def post_num():
         for signal_num in range(length):
 
             if int(pre_entropy[i][-1]) == int(X_test[signal_num][0][-1]):
-                tmp_data = X_test[signal_num]
-                tmp_label = y_test[signal_num]
-                X_train = np.append(X_train, tmp_data)
-                y_train = np.append(y_train, tmp_label)
+                tmp_data = X_test[signal_num:signal_num+1]
+                tmp_label = y_test[signal_num:signal_num+1]
+                print(tmp_data.shape)
+                print(tmp_label.shape)
+                X_train = np.append(X_train, tmp_data, axis=0)
+                y_train = np.append(y_train, tmp_label, axis=0)
                 y_test = np.delete(y_test, signal_num, axis=0)
                 X_test = np.delete(X_test, signal_num, axis=0)
 
@@ -92,6 +94,7 @@ def retrain():
     labels = request.get_json()['labels']
     print(ids)
     print(labels)
+    print(X_train.shape)
     return jsonify({'msg':'OK'})
 
 
