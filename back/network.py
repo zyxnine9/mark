@@ -151,8 +151,16 @@ def re_train_model(train_data, X_test, y_test, model, epoch=10, validation_stand
     # 选择损失函数
     Loss_target = nn.CrossEntropyLoss()
     Loss_target = Loss_target.cuda()
-    optimizer = optim.Adam(model.parameters(), lr=0.001)
 
+    for para in model.conv1.parameters():
+        para.requires_grad = False
+    for para in model.conv2.parameters():
+        para.requires_grad = False
+    for para in model.conv3.parameters():
+        para.requires_grad = False
+    for para in model.conv4.parameters():
+        para.requires_grad = False
+    optimizer = optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=0.001)
     for epoch in range(epoch):
         acc = []
         losssum = []

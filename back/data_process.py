@@ -14,6 +14,79 @@ train_has_label = [1, 10, 11, 12, 13, 14, 15, 16]
 index = 0
 
 
+def add_to_train(deleted_X, deleted_y, deleted_raw, deleted_fft, X_train, y_train, raw_train, fft_train):
+
+    X_train = np.append(X_train, deleted_X, axis=0)
+    y_train = np.append(y_train, deleted_y, axis=0)
+    raw_train = np.append(raw_train, deleted_raw, axis=0)
+    fft_train = np.append(fft_train, deleted_fft, axis=0)
+    return X_train, y_train, raw_train, fft_train
+
+
+def delete_from_pool(X_pool, y_pool, raw_pool, fft_pool, selected):
+    deleted_X = []
+    deleted_y = []
+    deleted_raw = []
+    deleted_fft = []
+    for i in selected:
+        X = X_pool[i]
+        deleted_X.append(X)
+        X_pool = np.delete(X_pool, i, axis=0)
+        y = y_pool[i]
+        deleted_y.append(y)
+        y_pool = np.delete(y_pool, i, axis=0)
+        raw = raw_pool[i]
+        deleted_raw.append(raw)
+        raw_pool = np.delete(raw_pool, i, axis=0)
+        fft = fft_pool[i]
+        deleted_fft.append(fft)
+        fft_pool = np.delete(fft_pool, i, axis=0)
+    return deleted_X, deleted_y, deleted_raw, deleted_fft, X_pool, y_pool, raw_pool, fft_pool
+
+
+def select(entropy_pred, front, back):
+    selected = []
+    selected_entropy = []
+    nums = [entropy[0] for entropy in entropy_pred]
+    for i in range(front):
+        cur = np.argmax(nums, axis=0)
+        print(np.max(nums))
+        print(entropy_pred[cur])
+        selected.append(cur)
+        selected_entropy.append(entropy_pred[cur])
+        entropy_pred.pop(cur)
+        nums.pop(cur)
+    for i in range(back):
+        cur = np.argmin(nums, axis=0)
+        selected.append(cur)
+        selected_entropy.append(entropy_pred[cur])
+        entropy_pred.pop(cur)
+        nums.pop(cur)
+    return selected, selected_entropy
+
+
+def load_feature_data(path_feature, path_label):
+    feature_data = np.load(path_feature, allow_pickle=True)
+    labels = np.load(path_label, allow_pickle=True)
+    return feature_data, labels
+
+
+def load_signal_data(path):
+    f = h5py.File(path, 'r')
+    fft_datas = []
+    raw_datas = []
+    for title in f:
+        for group in f[title]:
+            for train in f[title][group]:
+                for signal_num in f[title][group][train]:
+                    fftdata = f[title][group][train][signal_num]['FFT'][0][0][0]
+                    rawdata = f[title][group][train][signal_num]['rawEMG'][0][0][0]
+
+                    raw_datas.append(rawdata)
+                    fft_datas.append(fftdata)
+    return raw_datas, fft_datas
+
+
 def takeFirst(elem):
     return elem[0]
 
@@ -47,7 +120,7 @@ def load_data_to_train(path):
                     raw_datas.append(rawdata)
                     datas.append(fftdata)
                     index += 1
-            break
+
 
 
     datas_butter = []
