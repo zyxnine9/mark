@@ -9,12 +9,13 @@ import base64
 
 app = Flask(__name__)
 CORS(app)
-
+print(np.random.random(20))
 
 # from flask import render_template, jsoçnify
 
 @app.route("/train",methods=['POST'])
 def train():
+    print('training')
     return jsonify({"a":"123","b":"445"})
 
 @app.route("/post", methods=['POST','GET'])
@@ -23,6 +24,9 @@ def post_num():
     # 这里应该是一个返回id_list,img_list的函数，随便示例一下
     img_lst = []
     id_lst= list(range(num))
+    # raw_images=np.random.random(20)
+    # fft_images = np.random.random(20)
+
     for i in range(int(num)):
         x = np.random.random(10)
         fig = plt.figure(1, figsize=(5, 5))
@@ -31,6 +35,7 @@ def post_num():
         fig.savefig(sio, format='png')
         img_base64 = base64.b64encode(sio.getvalue()).decode('utf8')
         img_lst.append(img_base64)
+    # return jsonify({"ids": id_lst, "raw_images": raw_images,"fft_images": fft_images})
     return jsonify({"ids":id_lst,"images":img_lst})
 
 
