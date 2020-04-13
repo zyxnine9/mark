@@ -47,7 +47,7 @@ def retrain():
 
 @app.route('/test')
 def test():
-    return "1"
+    return jsonify({'msg':'OK'})
 
 
 if __name__ == '__main__':
