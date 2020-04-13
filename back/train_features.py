@@ -39,5 +39,5 @@ def emg_lgb(X_train, X_test, y_train, y_test):
     y_test_prob = lgb_clf.predict(X_test)
     y_test_pred = np.argmax(y_test_prob,axis = 1)
     print(classification_report(y_test,y_test_pred))
-    lgb_clf.save_model('model.txt')
+    lgb_clf.save_model('models/model.txt')
     return y_test_pred, y_test_prob

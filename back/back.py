@@ -10,6 +10,8 @@ import data_process
 #from network import *
 import lightgbm as lgb
 from sklearn.metrics import *
+from sklearn.mixture import GaussianMixture
+from sklearn.cluster import k_means
 import train_features
 
 
@@ -32,11 +34,11 @@ feature_data, labels = data_process.load_feature_data('datas/features.npy', 'dat
 raw_datas, fft_datas = data_process.load_signal_data(path)
 
 X_train, X_test, y_train, y_test = data_process.train_test_split(feature_data, labels, test_size=0.2, random_state=42)
-X_train, X_pool, y_train, y_pool = data_process.train_test_split(X_train, y_train, test_size=0.99, random_state=42)
+X_train, X_pool, y_train, y_pool = data_process.train_test_split(X_train, y_train, test_size=0.997, random_state=42)
 raw_train, raw_test, raw_labels, _ = data_process.train_test_split(raw_datas, labels, test_size=0.2, random_state=42)
-raw_train, raw_pool, _, _ = data_process.train_test_split(raw_train, raw_labels, test_size=0.99, random_state=42)
+raw_train, raw_pool, _, _ = data_process.train_test_split(raw_train, raw_labels, test_size=0.997, random_state=42)
 fft_train, fft_test, _, _ = data_process.train_test_split(fft_datas, labels, test_size=0.2, random_state=42)
-fft_train, fft_pool, _, _ = data_process.train_test_split(fft_train, raw_labels, test_size=0.99, random_state=42)
+fft_train, fft_pool, _, _ = data_process.train_test_split(fft_train, raw_labels, test_size=0.997, random_state=42)
 
 # from flask import render_template, jsoçnify
 
