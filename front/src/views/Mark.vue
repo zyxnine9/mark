@@ -45,7 +45,7 @@ export default {
       ids: [],
       options: ["Active", "Rest", "Noisy", "Unknown"],
       index: 0,
-      nextButton: "下一个",
+      // nextButton: "下一个",
       dialogVisible: false
     };
   },
@@ -53,34 +53,44 @@ export default {
     imgs() {
       console.log(this.images);
       return this.images.map(e => "http://localhost:5000/image/" + e);
+    },
+    nextButton() {
+      if (this.index != this.images.length - 1) {
+        return "下一个";
+      }
+      if (this.index == this.images.length - 1) {
+        return "提交";
+      }
+      return "下一个";
     }
   },
   methods: {
     toNext() {
       this.index++;
-      console.log(this.index);
-      console.log(this.images.length - 1);
-      if (this.index == this.images.length - 1) {
-        this.nextButton = "提交";
-      }
+
       this.$refs.ques.next();
     },
     toPrev() {
       this.index--;
-      if (!this.index == this.images.length - 1) {
-        this.nextButton = "下一个";
-      }
+    
       this.$refs.ques.prev();
     },
+
     canToNextPage() {
-      return (this.labels[this.index] != undefined) && this.index < this.images.length - 1;
+      return (
+        this.labels[this.index] != undefined &&
+        this.index < this.images.length - 1
+      );
     },
     canPost() {
-      return (this.labels[this.index] != undefined) && this.index == this.images.length - 1;
+      return (
+        this.labels[this.index] != undefined &&
+        this.index == this.images.length - 1
+      );
     },
     submit() {
       console.log("canToNextPage  " + this.canToNextPage());
-      
+
       if (this.canToNextPage()) {
         this.toNext();
       } else if (this.canPost()) {

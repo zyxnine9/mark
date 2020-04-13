@@ -18,6 +18,11 @@ const routes = [
     path: '/mark',
     name: 'Mark',
     component: ()=>import('../views/Mark')
+  },
+  {
+    path: '/train',
+    name: 'train',
+    component: ()=>import('../views/Train')
   }
 ]
 
