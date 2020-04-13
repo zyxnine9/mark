@@ -36,6 +36,7 @@
 
 <script>
 import axios from "axios";
+import { retrain } from "../assets/api"
 export default {
   name: "",
   data() {
@@ -50,10 +51,10 @@ export default {
     };
   },
   computed: {
-    imgs() {
-      console.log(this.images);
-      return this.images.map(e => "http://localhost:5000/image/" + e);
-    },
+    // imgs() {
+    //   console.log(this.images);
+    //   return this.images.map(e => "http://localhost:5000/image/" + e);
+    // },
     nextButton() {
       if (this.index != this.images.length - 1) {
         return "下一个";
@@ -105,7 +106,7 @@ export default {
     },
     postData() {
       axios
-        .post("http://127.0.0.1:5000/retrain", {
+        .post(retrain, {
           ids: this.ids,
           labels: this.labels
         })

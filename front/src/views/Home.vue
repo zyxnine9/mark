@@ -10,6 +10,7 @@
 
 <script>
 import axios from "axios";
+import {postValue} from '../assets/api'
 export default {
   name: "",
   data() {
@@ -22,7 +23,7 @@ export default {
     getNumber() {
       if (this.value) {
         axios
-          .post("http://127.0.0.1:5000/post", { value: this.value })
+          .post(postValue, { value: this.value })
           .then(e => {
             if (e.data) {
               console.log(e.data);

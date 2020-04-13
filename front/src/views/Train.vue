@@ -7,6 +7,7 @@
 
 <script>
     import axios from "axios";
+    import { train } from '../assets/api'
 
     export default {
         name: '',
@@ -17,7 +18,7 @@
         methods:{
             train() {
                 axios
-                    .post("http://127.0.0.1:5000/train", {})
+                    .post(train, {})
                     .then(res => {
                         console.log(res);
                         this.$router.push("/home");
