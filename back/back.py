@@ -6,7 +6,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 from io import BytesIO
 import base64
-<<<<<<< HEAD
 import data_process
 #from network import *
 import lightgbm as lgb
@@ -80,26 +79,11 @@ def train():
     return jsonify({"a":"123","b":"445"})
 
 
-=======
-
-app = Flask(__name__)
-CORS(app)
-print(np.random.random(20))
-
-# from flask import render_template, jsoçnify
-
-@app.route("/train",methods=['POST'])
-def train():
-    print('training')
-    return jsonify({"a":"123","b":"445"})
-
->>>>>>> 93601844cc75e63326eea7bb55903a8a9e654468
 @app.route("/post", methods=['POST','GET'])
 def post_num():
     num = request.get_json()['value']
     # 这里应该是一个返回id_list,img_list的函数，随便示例一下
     img_lst = []
-<<<<<<< HEAD
     id_lst= []
     global pre_entropy
     global X_pool, X_train, y_pool, y_train, deleted_X, deleted_y, deleted_raw, deleted_fft, raw_pool, fft_pool
@@ -129,40 +113,21 @@ def post_num():
         plt.subplot(133)
         plt.cla()
         plt.bar([0, 1, 2, 3], selected_entropy[i][-1])
-=======
-    id_lst= list(range(num))
-    # raw_images=np.random.random(20)
-    # fft_images = np.random.random(20)
-
-    for i in range(int(num)):
-        x = np.random.random(10)
-        fig = plt.figure(1, figsize=(5, 5))
-        plt.plot(x)
->>>>>>> 93601844cc75e63326eea7bb55903a8a9e654468
         sio = BytesIO()
         fig.savefig(sio, format='png')
         img_base64 = base64.b64encode(sio.getvalue()).decode('utf8')
         img_lst.append(img_base64)
-<<<<<<< HEAD
         id_lst.append(i)
 
-=======
-    # return jsonify({"ids": id_lst, "raw_images": raw_images,"fft_images": fft_images})
->>>>>>> 93601844cc75e63326eea7bb55903a8a9e654468
     return jsonify({"ids":id_lst,"images":img_lst})
 
 
 @app.route("/retrain", methods=['POST','GET'])
 def retrain():
-<<<<<<< HEAD
-
-=======
->>>>>>> 93601844cc75e63326eea7bb55903a8a9e654468
     ids = request.get_json()['ids']
     labels = request.get_json()['labels']
     print(ids)
     print(labels)
-<<<<<<< HEAD
     global X_train, y_train, raw_train, fft_train
     print(X_train.shape)
     X_train, y_train, raw_train, fft_train = data_process.add_to_train(deleted_X, deleted_y, deleted_raw, deleted_fft, X_train, y_train, raw_train, fft_train)
@@ -177,22 +142,8 @@ def retrain():
 
 @app.route('/test')
 def test():
-    return "1"
-
-
-if __name__ == '__main__':
-    app.run(debug=True)
-=======
-    return jsonify({'msg':'OK'})
-
-
-
-
-@app.route('/test')
-def test():
     return jsonify({'msg':'OK'})
 
 
 if __name__ == '__main__':
     app.run(debug=True)
->>>>>>> 93601844cc75e63326eea7bb55903a8a9e654468

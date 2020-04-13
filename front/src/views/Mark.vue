@@ -36,10 +36,7 @@
 
 <script>
 import axios from "axios";
-<<<<<<< HEAD
-=======
 import { retrain } from "../assets/api"
->>>>>>> 93601844cc75e63326eea7bb55903a8a9e654468
 export default {
   name: "",
   data() {
@@ -49,20 +46,11 @@ export default {
       ids: [],
       options: ["Active", "Rest", "Noisy", "Unknown"],
       index: 0,
-<<<<<<< HEAD
-      nextButton: "下一个",
-=======
       // nextButton: "下一个",
->>>>>>> 93601844cc75e63326eea7bb55903a8a9e654468
       dialogVisible: false
     };
   },
   computed: {
-<<<<<<< HEAD
-    imgs() {
-      console.log(this.images);
-      return this.images.map(e => "http://localhost:5000/image/" + e);
-=======
     // imgs() {
     //   console.log(this.images);
     //   return this.images.map(e => "http://localhost:5000/image/" + e);
@@ -75,41 +63,15 @@ export default {
         return "提交";
       }
       return "下一个";
->>>>>>> 93601844cc75e63326eea7bb55903a8a9e654468
     }
   },
   methods: {
     toNext() {
       this.index++;
-<<<<<<< HEAD
-      console.log(this.index);
-      console.log(this.images.length - 1);
-      if (this.index == this.images.length - 1) {
-        this.nextButton = "提交";
-      }
-=======
-
->>>>>>> 93601844cc75e63326eea7bb55903a8a9e654468
       this.$refs.ques.next();
     },
     toPrev() {
       this.index--;
-<<<<<<< HEAD
-      if (!this.index == this.images.length - 1) {
-        this.nextButton = "下一个";
-      }
-      this.$refs.ques.prev();
-    },
-    canToNextPage() {
-      return (this.labels[this.index] != undefined) && this.index < this.images.length - 1;
-    },
-    canPost() {
-      return (this.labels[this.index] != undefined) && this.index == this.images.length - 1;
-    },
-    submit() {
-      console.log("canToNextPage  " + this.canToNextPage());
-      
-=======
     
       this.$refs.ques.prev();
     },
@@ -129,7 +91,6 @@ export default {
     submit() {
       console.log("canToNextPage  " + this.canToNextPage());
 
->>>>>>> 93601844cc75e63326eea7bb55903a8a9e654468
       if (this.canToNextPage()) {
         this.toNext();
       } else if (this.canPost()) {
@@ -144,11 +105,7 @@ export default {
     },
     postData() {
       axios
-<<<<<<< HEAD
-        .post("http://127.0.0.1:5000/retrain", {
-=======
         .post(retrain, {
->>>>>>> 93601844cc75e63326eea7bb55903a8a9e654468
           ids: this.ids,
           labels: this.labels
         })
