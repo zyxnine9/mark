@@ -74,7 +74,6 @@ def train():
 
     y_pool_prob = lgb_clf.predict(X_test)
     pre_entropy = train_features.entropy(y_pool_prob)
-    
 
     return jsonify({"a":"123","b":"445"})
 

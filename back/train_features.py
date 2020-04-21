@@ -14,7 +14,7 @@ def entropy(out):
     for i in range(len(out)):
       entropy_signal = 0
       for j in range(4):
-        entropy_signal += np.log(out[i][j])
+        entropy_signal += np.log(out[i][j])*out[i][j]
       pre_entropy.append([entropy_signal, np.argmax(out[i]), out[i]])
 
     return pre_entropy
