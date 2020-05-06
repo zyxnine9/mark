@@ -8,8 +8,9 @@
       height="80vh"
       ref="ques"
     >
-      <el-carousel-item v-for="img in images" :key="img">
-        <img v-bind:src="'data:image/jpeg;base64,'+img" />
+      <el-carousel-item v-for="(img,index) in images" :key="img">
+        <!-- <img v-bind:src="'data:image/jpeg;base64,'+img" /> -->
+        <LineChart :data="data[index]"/>
       </el-carousel-item>
     </el-carousel>
     <el-select v-model="labels[index]" placeholder="请选择">
@@ -36,7 +37,9 @@
 
 <script>
 import axios from "axios";
+import { mapState } from 'vuex'
 import { retrain } from "../assets/api"
+import LineChart from '../compoment/LineChart'
 export default {
   name: "",
   data() {
@@ -46,7 +49,6 @@ export default {
       ids: [],
       options: ["Active", "Rest", "Noisy", "Unknown"],
       index: 0,
-      // nextButton: "下一个",
       dialogVisible: false
     };
   },
@@ -55,6 +57,9 @@ export default {
     //   console.log(this.images);
     //   return this.images.map(e => "http://localhost:5000/image/" + e);
     // },
+    ...mapState({
+      data: state => state.data,
+    }),
     nextButton() {
       if (this.index != this.images.length - 1) {
         return "下一个";
@@ -121,6 +126,9 @@ export default {
   created() {
     this.ids = this.$route.params.ids;
     this.images = this.$route.params.images;
+  },
+  components:{
+    LineChart
   }
 };
 </script>
