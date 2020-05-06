@@ -133,7 +133,7 @@ def entropy(out, X):
     for i in range(len(out)):
         entropy_signal = 0
         for j in range(4):
-            entropy_signal += torch.log(out[i][j])
+            entropy_signal += -torch.log(out[i][j])*out[i][j]
         pre_entropy.append([float(entropy_signal), float(torch.argmax(out[i], -1)), list(out[i]), float(X[i][0][-1])])
 
     return pre_entropy
