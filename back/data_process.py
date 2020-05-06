@@ -47,21 +47,17 @@ def delete_from_pool(X_pool, y_pool, raw_pool, fft_pool, selected):
 def select(entropy_pred, front, back):
     selected = []
     selected_entropy = []
-    nums = [entropy[0] for entropy in entropy_pred]
+    nums = np.array([entropy[0] for entropy in entropy_pred])
+    order = nums.argsort(axis=0)
+    print(entropy_pred[order[0]])
     for i in range(front):
-        cur = np.argmax(nums, axis=0)
-        print(np.max(nums))
-        print(entropy_pred[cur])
-        selected.append(cur)
-        selected_entropy.append(entropy_pred[cur])
-        entropy_pred.pop(cur)
-        nums.pop(cur)
+        selected.append(order[i])
+        selected_entropy.append(entropy_pred[order[i]])
+    order = nums.argsort(axis=0)[::-1]
+    print(entropy_pred[order[0]])
     for i in range(back):
-        cur = np.argmin(nums, axis=0)
-        selected.append(cur)
-        selected_entropy.append(entropy_pred[cur])
-        entropy_pred.pop(cur)
-        nums.pop(cur)
+        selected.append(order[i])
+        selected_entropy.append(entropy_pred[order[i]])
     return selected, selected_entropy
 
 
@@ -326,8 +322,8 @@ def show_signal(datas, labels, signal_num):
 
 
 if __name__ == '__main__':
-    datas, raw_datas, labels, datas_butter, X_train, X_test, y_train, y_test = load_data_to_train(path)
-    print(X_train.shape)
+
+    print(123456)
 
 
 

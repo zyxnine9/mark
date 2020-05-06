@@ -12,10 +12,10 @@ from sklearn.neighbors import KNeighborsClassifier
 def entropy(out):
     pre_entropy = []
     for i in range(len(out)):
-      entropy_signal = 0
-      for j in range(4):
-        entropy_signal += np.log(out[i][j])*out[i][j]
-      pre_entropy.append([entropy_signal, np.argmax(out[i]), out[i]])
+        entropy_signal = 0
+        for j in range(4):
+          entropy_signal += -np.log(out[i][j])*out[i][j]
+        pre_entropy.append([entropy_signal, np.argmax(out[i]), out[i]])
 
     return pre_entropy
 

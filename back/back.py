@@ -18,8 +18,8 @@ import train_features
 
 app = Flask(__name__)
 CORS(app)
-# path = "../../2020MAR-EMG Labeling Data/labeling.h5"
-path = "./emg_data.h5"
+path = "../../2020MAR-EMG Labeling Data/labeling.h5"
+# path = "./emg_data.h5"
 validation_standard = 0
 pre_entropy = []
 deleted_X, deleted_y, deleted_raw, deleted_fft = [], [], [], []
@@ -90,9 +90,8 @@ def post_num():
     global X_pool, X_train, y_pool, y_train, deleted_X, deleted_y, deleted_raw, deleted_fft, raw_pool, fft_pool
     print(X_pool.shape)
     deleted_X, deleted_y, deleted_raw, deleted_fft = [], [], [], []
-    selected, selected_entropy = data_process.select(pre_entropy, 10, 0)
+    selected, selected_entropy = data_process.select(pre_entropy, 0, 10)
     deleted_X, deleted_y, deleted_raw, deleted_fft, X_pool, y_pool, raw_pool, fft_pool = data_process.delete_from_pool(X_pool, y_pool, raw_pool, fft_pool, selected)
-
     print(X_pool.shape)
     for i in range(int(num)):
         print(selected_entropy[i])
