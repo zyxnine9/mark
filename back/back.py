@@ -1,3 +1,4 @@
+#coding:utf-8
 from flask import Flask, render_template, jsonify, Response, request
 from flask_cors import CORS
 # from PIL import Image
@@ -17,7 +18,8 @@ import train_features
 
 app = Flask(__name__)
 CORS(app)
-path = "../../2020MAR-EMG Labeling Data/labeling.h5"
+# path = "../../2020MAR-EMG Labeling Data/labeling.h5"
+path = "./emg_data.h5"
 validation_standard = 0
 pre_entropy = []
 deleted_X, deleted_y, deleted_raw, deleted_fft = [], [], [], []
