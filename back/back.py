@@ -84,7 +84,10 @@ def train():
 def post_num():
     num = request.get_json()['value']
     # 这里应该是一个返回id_list,img_list的函数，随便示例一下
-    img_lst = []
+    # img_lst = []
+    raw_lst = []
+    fft_lst = []
+    title_lst = []
     id_lst= []
     global pre_entropy
     global X_pool, X_train, y_pool, y_train, deleted_X, deleted_y, deleted_raw, deleted_fft, raw_pool, fft_pool
@@ -94,32 +97,35 @@ def post_num():
     deleted_X, deleted_y, deleted_raw, deleted_fft, X_pool, y_pool, raw_pool, fft_pool = data_process.delete_from_pool(X_pool, y_pool, raw_pool, fft_pool, selected)
     print(X_pool.shape)
     for i in range(int(num)):
-        print(selected_entropy[i])
-        x_fft = np.arange(0, len(deleted_fft[i]))
-        x_raw = np.arange(0, len(deleted_raw[i]))
-        # y = filtedData[x]
-        y_fft = deleted_fft[i][x_fft]
-        y_raw = deleted_raw[i][x_raw]
-        fig = plt.figure(1, figsize=(15, 5))
-        plt.subplot(131)
-        plt.cla()
-        plt.ylim(ymax=0.005)
-        plt.title(data_process.label_name[deleted_y[i]])
-        plt.plot(x_fft, y_fft)
-        plt.subplot(132)
-        plt.cla()
-        plt.title(data_process.label_name[deleted_y[i]])
-        plt.plot(x_raw, y_raw)
-        plt.subplot(133)
-        plt.cla()
-        plt.bar([0, 1, 2, 3], selected_entropy[i][-1])
-        sio = BytesIO()
-        fig.savefig(sio, format='png')
-        img_base64 = base64.b64encode(sio.getvalue()).decode('utf8')
-        img_lst.append(img_base64)
+        # print(selected_entropy[i])
+        # x_fft = np.arange(0, len(deleted_fft[i]))
+        # x_raw = np.arange(0, len(deleted_raw[i]))
+        # # y = filtedData[x]
+        # y_fft = deleted_fft[i][x_fft]
+        # y_raw = deleted_raw[i][x_raw]
+        # fig = plt.figure(1, figsize=(15, 5))
+        # plt.subplot(131)
+        # plt.cla()
+        # plt.ylim(ymax=0.005)
+        # plt.title(data_process.label_name[deleted_y[i]])
+        # plt.plot(x_fft, y_fft)
+        # plt.subplot(132)
+        # plt.cla()
+        # plt.title(data_process.label_name[deleted_y[i]])
+        # plt.plot(x_raw, y_raw)
+        # plt.subplot(133)
+        # plt.cla()
+        # plt.bar([0, 1, 2, 3], selected_entropy[i][-1])
+        # sio = BytesIO()
+        # fig.savefig(sio, format='png')
+        # img_base64 = base64.b64encode(sio.getvalue()).decode('utf8')
+        # img_lst.append(img_base64)
+        raw_lst.append(deleted_raw[i])
+        fft_lst.append(deleted_fft[i])
+        title_lst.append(data_process.label_name[deleted_y[i]])
         id_lst.append(i)
 
-    return jsonify({"ids":id_lst,"images":img_lst})
+    return jsonify({"ids":id_lst, "raw_datas": raw_lst, "fft_datas": fft_lst, "title:": title_lst})
 
 
 @app.route("/retrain", methods=['POST','GET'])
