@@ -1,4 +1,4 @@
-echo 密码是Health.pcl
-echo ssh engineer@47.112.232.246
+ echo 密码是Health.pcl
+# echo ssh engineer@47.112.232.246
 #scp -r ./dist engineer@47.112.232.246:/home/engineer/zyx
-scp -r ./dist engineer@47.112.232.246:/data/webapps/mark-frontend
+scp -r ./dist/* engineer@47.112.232.246:/data/webapps/mark-frontend/dist
