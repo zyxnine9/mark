@@ -27,6 +27,7 @@ export default {
           .then(e => {
             if (e.data) {
               console.log(e.data);
+              // this.$store.dispatch('setData',e.data)
               this.$router.push({ name: "Mark", params: e.data });
             }
           });

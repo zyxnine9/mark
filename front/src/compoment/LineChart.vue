@@ -1,5 +1,5 @@
 <template>
-  <div id="line-chart" style="height:200px;width:200px"></div>
+  <div ref="line_chart" style="height:60vh;width:100vh"></div>
 </template>
 
 <script>
@@ -67,7 +67,7 @@ export default {
           }
         ]
       };
-      let lineChart = echarts.init(document.getElementById("line-chart"));
+      let lineChart = echarts.init(this.$refs.line_chart);
       lineChart.setOption(option);
     }
   },
