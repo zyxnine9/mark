@@ -1,9 +1,10 @@
 <template>
   <div>
-    <h1>请选择标注的张数</h1>
+    <h1>请选择标注的类型</h1>
     <el-select v-model="value" placeholder="请选择">
-      <el-option v-for="item in options" :key="item" :label="item" :value="item"></el-option>
+      <el-option v-for="(item,index) in options" :key="item" :label="item" :value="index"></el-option>
     </el-select>
+    {{value}}
     <el-button type="primary" @click="getNumber">确定</el-button>
   </div>
 </template>
@@ -15,8 +16,8 @@ export default {
   name: "",
   data() {
     return {
-      options: [1, 3, 5, 10],
-      value: ""
+      options: ['Active','Rest'],
+      value: undefined,
     };
   },
   methods: {

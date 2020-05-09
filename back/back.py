@@ -18,8 +18,8 @@ import train_features
 
 app = Flask(__name__)
 CORS(app)
-path = "../../2020MAR-EMG Labeling Data/labeling.h5"
-# path = "./emg_data.h5"
+# path = "../../2020MAR-EMG Labeling Data/labeling.h5"
+path = "./emg_data.h5"
 validation_standard = 0
 pre_entropy = []
 deleted_X, deleted_y, deleted_raw, deleted_fft = [], [], [], []
