@@ -14,15 +14,28 @@ from sklearn.metrics import *
 from sklearn.mixture import GaussianMixture
 from sklearn.cluster import k_means
 import train_features
+import scipy.io as scio
+from scipy.fftpack import fft
 
 
 app = Flask(__name__)
 CORS(app)
-# path = "../../2020MAR-EMG Labeling Data/labeling.h5"
-path = "./emg_data.h5"
-validation_standard = 0
-pre_entropy = []
-deleted_X, deleted_y, deleted_raw, deleted_fft = [], [], [], []
+path = "../../2020MAR-EMG Labeling Data/labeling.h5"
+origin_path = "../../2020MAR-EMG Labeling Data/Labeling Test Signal.mat"
+data = scio.loadmat(path)
+# path = "./emg_data.h5"
+# validation_standard = 0
+# pre_entropy = []
+# deleted_X, deleted_y, deleted_raw, deleted_fft = [], [], [], []
+
+activate = []
+det_active = []
+rest = []
+det_rest = []
+
+name = 'NAAC_s18081064wct_Train15_HandOpen'
+number = 0
+channel = 1
 
 # CNN部分
 # datas, raw_datas, labels, datas_butter, X_train, X_test, y_train, y_test = data_process.load_data_to_train(path)
@@ -32,15 +45,15 @@ deleted_X, deleted_y, deleted_raw, deleted_fft = [], [], [], []
 # model = load_model(model, 'models/little_parameter.pkl')
 # model = model.cuda()
 
-feature_data, labels = data_process.load_feature_data('datas/features.npy', 'datas/labels.npy')
-raw_datas, fft_datas = data_process.load_signal_data(path)
-
-X_train, X_test, y_train, y_test = data_process.train_test_split(feature_data, labels, test_size=0.2, random_state=42)
-X_train, X_pool, y_train, y_pool = data_process.train_test_split(X_train, y_train, test_size=0.997, random_state=42)
-raw_train, raw_test, raw_labels, _ = data_process.train_test_split(raw_datas, labels, test_size=0.2, random_state=42)
-raw_train, raw_pool, _, _ = data_process.train_test_split(raw_train, raw_labels, test_size=0.997, random_state=42)
-fft_train, fft_test, _, _ = data_process.train_test_split(fft_datas, labels, test_size=0.2, random_state=42)
-fft_train, fft_pool, _, _ = data_process.train_test_split(fft_train, raw_labels, test_size=0.997, random_state=42)
+# feature_data, labels = data_process.load_feature_data('datas/features.npy', 'datas/labels.npy')
+# raw_datas, fft_datas = data_process.load_signal_data(path)
+#
+# X_train, X_test, y_train, y_test = data_process.train_test_split(feature_data, labels, test_size=0.2, random_state=42)
+# X_train, X_pool, y_train, y_pool = data_process.train_test_split(X_train, y_train, test_size=0.997, random_state=42)
+# raw_train, raw_test, raw_labels, _ = data_process.train_test_split(raw_datas, labels, test_size=0.2, random_state=42)
+# raw_train, raw_pool, _, _ = data_process.train_test_split(raw_train, raw_labels, test_size=0.997, random_state=42)
+# fft_train, fft_test, _, _ = data_process.train_test_split(fft_datas, labels, test_size=0.2, random_state=42)
+# fft_train, fft_pool, _, _ = data_process.train_test_split(fft_train, raw_labels, test_size=0.997, random_state=42)
 
 # from flask import render_template, jsoçnify
 
@@ -68,14 +81,36 @@ def train():
     # pre_entropy.sort(key=data_process.takeFirst, reverse=True)
     # pre_entropy = pre_entropy[:8]+pre_entropy[-5:]
     # print(len(pre_entropy))
-    global pre_entropy
+    # global pre_entropy
     lgb_clf = lgb.Booster(model_file='models/model.txt')
-    y_test_prob = lgb_clf.predict(X_test)
-    y_test_pred = np.argmax(y_test_prob, axis=1)
-    print(classification_report(y_test, y_test_pred))
+    # y_test_prob = lgb_clf.predict(X_test)
+    # y_test_pred = np.argmax(y_test_prob, axis=1)
+    # print(classification_report(y_test, y_test_pred))
+    #
+    # y_pool_prob = lgb_clf.predict(X_test)
+    # pre_entropy = train_features.entropy(y_pool_prob)
 
-    y_pool_prob = lgb_clf.predict(X_test)
-    pre_entropy = train_features.entropy(y_pool_prob)
+    global activate, det_active, rest, det_rest
+
+
+
+    signal = data[name][0][number]
+
+    for length in {2000, 4000, 6000}:
+        for i in range(0, signal.shape[0], length // 4):
+            if i + length > signal.shape[0]:
+                break
+            tmp_feature = np.array(train_features.feature_extract(signal[i:i + length, channel]))
+            tmp_feature = tmp_feature[np.newaxis, :]
+            y_test_prob = lgb_clf.predict(tmp_feature)
+            y_test_pred = np.argmax(y_test_prob, axis=1)
+            y_test_pred = int(y_test_pred)
+            if y_test_pred == 0:
+                activate.append(signal[i:i + length, channel])
+                det_active.append([i, i + length, y_test_prob[0][0]])
+            if y_test_pred == 1:
+                rest.append(signal[i:i + length, channel])
+                det_rest.append([i, i + length, y_test_prob[0][1]])
 
     return jsonify({"a":"123","b":"445"})
 
@@ -89,14 +124,26 @@ def post_num():
     fft_lst = []
     title_lst = []
     id_lst= []
-    global pre_entropy
-    global X_pool, X_train, y_pool, y_train, deleted_X, deleted_y, deleted_raw, deleted_fft, raw_pool, fft_pool
-    print(X_pool.shape)
-    deleted_X, deleted_y, deleted_raw, deleted_fft = [], [], [], []
-    selected, selected_entropy = data_process.select(pre_entropy, 0, 10)
-    deleted_X, deleted_y, deleted_raw, deleted_fft, X_pool, y_pool, raw_pool, fft_pool = data_process.delete_from_pool(X_pool, y_pool, raw_pool, fft_pool, selected)
-    print(X_pool.shape)
-    for i in range(int(num)):
+    # global pre_entropy
+    # global X_pool, X_train, y_pool, y_train, deleted_X, deleted_y, deleted_raw, deleted_fft, raw_pool, fft_pool
+    # print(X_pool.shape)
+    # deleted_X, deleted_y, deleted_raw, deleted_fft = [], [], [], []
+    # selected, selected_entropy = data_process.select(pre_entropy, 0, 10)
+    # deleted_X, deleted_y, deleted_raw, deleted_fft, X_pool, y_pool, raw_pool, fft_pool = data_process.delete_from_pool(X_pool, y_pool, raw_pool, fft_pool, selected)
+    # print(X_pool.shape)
+    if num == 0:
+        keep = train_features.py_cpu_nms(np.array(det_active), 0.2)
+        for i in keep:
+            fft_signal = fft(activate[i])
+            P2 = abs(fft_signal / len(fft_signal))
+            P1 = P2[1:len(P2) // 2 + 1]
+            P1[2:-1] = 2 * P1[2:-1]
+            # img_lst.append(img_base64)
+            raw_lst.append(activate[i].tolist())
+            fft_lst.append(P1[i].tolist())
+            title_lst.append(name + '_0_' + str(number) + '_channel' + str(channel)+ '_start' + str(det_active[i][0]) + '_end' + str(det_active[i][1]) + '_activate')
+            id_lst.append(i)
+    else:
         # print(selected_entropy[i])
         # x_fft = np.arange(0, len(deleted_fft[i]))
         # x_raw = np.arange(0, len(deleted_raw[i]))
@@ -120,10 +167,17 @@ def post_num():
         # fig.savefig(sio, format='png')
         # img_base64 = base64.b64encode(sio.getvalue()).decode('utf8')
         # img_lst.append(img_base64)
-        raw_lst.append(deleted_raw[i].tolist())
-        fft_lst.append(deleted_fft[i].tolist())
-        title_lst.append(data_process.label_name[deleted_y[i]])
-        id_lst.append(i)
+        keep = train_features.py_cpu_nms(np.array(det_rest), 0.2)
+        for i in keep:
+            fft_signal = fft(rest[i])
+            P2 = abs(fft_signal / len(fft_signal))
+            P1 = P2[1:len(P2) // 2 + 1]
+            P1[2:-1] = 2 * P1[2:-1]
+            # img_lst.append(img_base64)
+            raw_lst.append(rest[i].tolist())
+            fft_lst.append(P1[i].tolist())
+            title_lst.append(name + '_0_' + str(number) + '_channel' + str(channel) + '_start' + str(det_rest[i][0]) + '_end' + str(det_rest[i][1]) + '_rest')
+            id_lst.append(i)
 
     return jsonify({"ids":id_lst, "raw_datas": raw_lst, "fft_datas": fft_lst, "title:": title_lst})
 
@@ -134,11 +188,11 @@ def retrain():
     labels = request.get_json()['labels']
     print(ids)
     print(labels)
-    global X_train, y_train, raw_train, fft_train
-    print(X_train.shape)
-    X_train, y_train, raw_train, fft_train = data_process.add_to_train(deleted_X, deleted_y, deleted_raw, deleted_fft, X_train, y_train, raw_train, fft_train)
-    print(X_train.shape)
-    train_features.emg_lgb(X_train, X_test, y_train, y_test)
+    # global X_train, y_train, raw_train, fft_train
+    # print(X_train.shape)
+    # X_train, y_train, raw_train, fft_train = data_process.add_to_train(deleted_X, deleted_y, deleted_raw, deleted_fft, X_train, y_train, raw_train, fft_train)
+    # print(X_train.shape)
+    # train_features.emg_lgb(X_train, X_test, y_train, y_test)
     # global model, validation_standard
     # train_data = train_and_label_process(X_train[:, :, :-1], y_train[:, :-1])
     # model = re_train_model(train_data, X_test, y_test, model, 5, validation_standard)
