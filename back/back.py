@@ -120,8 +120,8 @@ def post_num():
         # fig.savefig(sio, format='png')
         # img_base64 = base64.b64encode(sio.getvalue()).decode('utf8')
         # img_lst.append(img_base64)
-        raw_lst.append(deleted_raw[i])
-        fft_lst.append(deleted_fft[i])
+        raw_lst.append(deleted_raw[i].tolist())
+        fft_lst.append(deleted_fft[i].tolist())
         title_lst.append(data_process.label_name[deleted_y[i]])
         id_lst.append(i)
 
