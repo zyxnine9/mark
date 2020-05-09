@@ -8,14 +8,15 @@
       height="80vh"
       ref="ques"
     >
-      <el-carousel-item v-for="(img,index) in images" :key="img">
+      <el-carousel-item v-for="(array,i) in data" :key="i">
         <!-- <img v-bind:src="'data:image/jpeg;base64,'+img" /> -->
-        <LineChart :data="data[index]"/>
+        <LineChart :data="data"/>
       </el-carousel-item>
     </el-carousel>
     <el-select v-model="labels[index]" placeholder="请选择">
       <el-option v-for="(item, index) in options" :key="item" :value="index" :label="item">{{item}}</el-option>
     </el-select>
+    <p>{{labels}}</p>
     <el-row>
       <el-col :span="12">
         <el-button v-if="index" type="primary" @click="toPrev">上一个</el-button>
@@ -84,13 +85,13 @@ export default {
     canToNextPage() {
       return (
         this.labels[this.index] != undefined &&
-        this.index < this.images.length - 1
+        this.index < this.data.length - 1
       );
     },
     canPost() {
       return (
         this.labels[this.index] != undefined &&
-        this.index == this.images.length - 1
+        this.index == this.data.length - 1
       );
     },
     submit() {
@@ -124,8 +125,9 @@ export default {
     }
   },
   created() {
-    this.ids = this.$route.params.ids;
-    this.images = this.$route.params.images;
+    // this.ids = this.$route.params.ids;
+    // this.images = this.$route.params.images;
+    console.log(this.data)
   },
   components:{
     LineChart

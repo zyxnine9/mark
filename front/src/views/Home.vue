@@ -23,7 +23,7 @@ export default {
     getNumber() {
       if (this.value) {
         axios
-          .post(postValue, { value: this.value })
+          .post(postValue, { value : this.value })
           .then(e => {
             if (e.data) {
               console.log(e.data);

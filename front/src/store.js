@@ -1,13 +1,12 @@
 import Vue from 'vue'
 import vuex from 'vuex'
+import {data} from './assets/data'
 
 Vue.use(vuex)
 
 export default new vuex.Store({
     state:{
-        data:[  [12,124,534,76575,324],
-                [123,543,765,867123,12543,],
-                [1232,32,68,123,456,8,6]],
+        data: data ,
     },
     actions:{
         setData(context, data){
