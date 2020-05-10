@@ -22,7 +22,7 @@ export default {
   },
   methods: {
     getNumber() {
-      if (this.value) {
+      if (this.value != undefined) {
         axios
           .post(postValue, { value : this.value })
           .then(e => {
