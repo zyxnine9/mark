@@ -22,7 +22,8 @@ app = Flask(__name__)
 CORS(app)
 path = "../../2020MAR-EMG Labeling Data/labeling.h5"
 origin_path = "../../2020MAR-EMG Labeling Data/Labeling Test Signal.mat"
-data = scio.loadmat(path)
+data = scio.loadmat(origin_path)
+
 # path = "./emg_data.h5"
 # validation_standard = 0
 # pre_entropy = []
@@ -111,7 +112,7 @@ def train():
             if y_test_pred == 1:
                 rest.append(signal[i:i + length, channel])
                 det_rest.append([i, i + length, y_test_prob[0][1]])
-
+    print("success")
     return jsonify({"a":"123","b":"445"})
 
 
@@ -142,7 +143,7 @@ def post_num():
             raw_lst.append(activate[i].tolist())
             fft_lst.append(P1[i].tolist())
             title_lst.append(name + '_0_' + str(number) + '_channel' + str(channel)+ '_start' + str(det_active[i][0]) + '_end' + str(det_active[i][1]) + '_activate')
-            id_lst.append(i)
+            id_lst.append(str(i))
     else:
         # print(selected_entropy[i])
         # x_fft = np.arange(0, len(deleted_fft[i]))
@@ -177,7 +178,7 @@ def post_num():
             raw_lst.append(rest[i].tolist())
             fft_lst.append(P1[i].tolist())
             title_lst.append(name + '_0_' + str(number) + '_channel' + str(channel) + '_start' + str(det_rest[i][0]) + '_end' + str(det_rest[i][1]) + '_rest')
-            id_lst.append(i)
+            id_lst.append(str(i))
 
     return jsonify({"ids":id_lst, "raw_datas": raw_lst, "fft_datas": fft_lst, "title:": title_lst})
 
