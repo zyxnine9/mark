@@ -141,7 +141,7 @@ def post_num():
             P1[2:-1] = 2 * P1[2:-1]
             # img_lst.append(img_base64)
             raw_lst.append(activate[i].tolist())
-            fft_lst.append(P1[i].tolist())
+            fft_lst.append(P1.tolist())
             title_lst.append(name + '_0_' + str(number) + '_channel' + str(channel)+ '_start' + str(det_active[i][0]) + '_end' + str(det_active[i][1]) + '_activate')
             id_lst.append(str(i))
     else:
@@ -176,7 +176,7 @@ def post_num():
             P1[2:-1] = 2 * P1[2:-1]
             # img_lst.append(img_base64)
             raw_lst.append(rest[i].tolist())
-            fft_lst.append(P1[i].tolist())
+            fft_lst.append(P1.tolist())
             title_lst.append(name + '_0_' + str(number) + '_channel' + str(channel) + '_start' + str(det_rest[i][0]) + '_end' + str(det_rest[i][1]) + '_rest')
             id_lst.append(str(i))
 
