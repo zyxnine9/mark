@@ -8,39 +8,35 @@
       height="80vh"
       ref="ques"
     >
-      <el-carousel-item v-for="(array,i) in data" :key="i">
+      <el-carousel-item v-for="(array,i) in groupNumber" :key="i">
         <!-- <img v-bind:src="'data:image/jpeg;base64,'+img" /> -->
-        <LineChart :data="data"/>
+        <LineChart :fftdata="data.fft_datas[i]" :rawdata="data.raw_datas[i]" />
       </el-carousel-item>
     </el-carousel>
-    <el-select v-model="labels[index]" placeholder="请选择">
-      <el-option v-for="(item, index) in options" :key="item" :value="index" :label="item">{{item}}</el-option>
-    </el-select>
-    <p>{{labels}}</p>
     <el-row>
-      <el-col :span="12">
-        <el-button v-if="index" type="primary" @click="toPrev">上一个</el-button>
-      </el-col>
-      <el-col :span="12">
-        <el-button type="primary" @click="submit">{{nextButton}}</el-button>
+      <el-col v-for="(v, i) in options" :key="i" :span="6">
+        <el-button type="primary" @click="mark(i)">{{ v }}</el-button>
       </el-col>
     </el-row>
+    <p>{{labels}}</p>
+    <p>{{index}}</p>
 
-    <el-dialog title="提示" :visible.sync="dialogVisible" width="30%">
+    <!-- <el-dialog title="提示" :visible.sync="dialogVisible" width="30%">
       <span>跳转至首页</span>
       <span slot="footer" class="dialog-footer">
         <el-button @click="dialogVisible = false">取 消</el-button>
         <el-button type="primary" @click="postData">确 定</el-button>
       </span>
-    </el-dialog>
+    </el-dialog> -->
   </div>
 </template>
 
 <script>
 import axios from "axios";
-import { mapState } from 'vuex'
-import { retrain } from "../assets/api"
-import LineChart from '../compoment/LineChart'
+import storage from "../storage";
+import { mapState } from "vuex";
+import { retrain } from "../assets/api";
+import LineChart from "../compoment/LineChart";
 export default {
   name: "",
   data() {
@@ -50,7 +46,10 @@ export default {
       ids: [],
       options: ["Active", "Rest", "Noisy", "Unknown"],
       index: 0,
-      dialogVisible: false
+      baseNumber: 0,
+      groupNumber: 6,
+      dialogVisible: false,
+      data: undefined
     };
   },
   computed: {
@@ -59,13 +58,13 @@ export default {
     //   return this.images.map(e => "http://localhost:5000/image/" + e);
     // },
     ...mapState({
-      data: state => state.data,
+      data_: state => state.data
     }),
     nextButton() {
-      if (this.index != this.images.length - 1) {
+      if (this.index != this.groupNumber - 1) {
         return "下一个";
       }
-      if (this.index == this.images.length - 1) {
+      if (this.index == this.groupNumber - 1) {
         return "提交";
       }
       return "下一个";
@@ -78,24 +77,25 @@ export default {
     },
     toPrev() {
       this.index--;
-    
+
       this.$refs.ques.prev();
     },
 
     canToNextPage() {
       return (
         this.labels[this.index] != undefined &&
-        this.index < this.data.length - 1
+        this.index < this.groupNumber - 1
       );
     },
     canPost() {
       return (
         this.labels[this.index] != undefined &&
-        this.index == this.data.length - 1
+        this.index == this.groupNumber - 1
       );
     },
     submit() {
       console.log("canToNextPage  " + this.canToNextPage());
+      console.log("can Post" + this.canPost());
 
       if (this.canToNextPage()) {
         this.toNext();
@@ -109,27 +109,26 @@ export default {
         });
       }
     },
-    postData() {
-      axios
-        .post(retrain, {
-          ids: this.ids,
-          labels: this.labels
-        })
-        .then(res => {
-          console.log(res);
-          this.$router.push("/");
-        })
-        .catch(error => {
-          console.log(error);
-        });
+    mark(i) {
+      console.log('mark')
+      this.labels[this.index] = i;
+      if (this.canToNextPage()) this.toNext();
+      if (this.canPost()){
+        this.$message("标注完")
+      }
     }
   },
   created() {
-    // this.ids = this.$route.params.ids;
-    // this.images = this.$route.params.images;
-    console.log(this.data)
+    const STORAGE_DATA = storage.getItem("data");
+    console.log(STORAGE_DATA);
+    console.log(this.data_);
+    if (this.data_ == undefined && STORAGE_DATA) {
+      this.data = STORAGE_DATA;
+    }else{
+      this.data = this.data_;
+    }
   },
-  components:{
+  components: {
     LineChart
   }
 };

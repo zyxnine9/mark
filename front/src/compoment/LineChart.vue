@@ -15,15 +15,16 @@
 import echarts from "echarts";
 export default {
   props: {
-    data: Object
+    fftdata: Array,
+    rawdata: Array
   },
   data() {
     return {};
   },
   computed: {
     FFTData() {
-      if (this.data.fftdata) {
-        let data = this.data.fftdata;
+      if (this.fftdata) {
+        let data = this.fftdata;
         for (let i = 0; i < data.length; i++) {
           data[i] = [i, data[i]];
         }
@@ -38,8 +39,8 @@ export default {
       }
     },
     RAWData() {
-      if (this.data.rawdata) {
-        let data = this.data.rawdata;
+      if (this.rawdata) {
+        let data = this.rawdata;
         for (let i = 0; i < data.length; i++) {
           data[i] = [i, data[i]];
         }

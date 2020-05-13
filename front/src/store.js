@@ -1,12 +1,11 @@
 import Vue from 'vue'
 import vuex from 'vuex'
-import {data} from './assets/data'
 
 Vue.use(vuex)
 
 export default new vuex.Store({
     state:{
-        data: data ,
+        data: undefined ,
     },
     actions:{
         setData(context, data){

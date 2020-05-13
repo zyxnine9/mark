@@ -180,7 +180,7 @@ def post_num():
             title_lst.append(name + '_0_' + str(number) + '_channel' + str(channel) + '_start' + str(det_rest[i][0]) + '_end' + str(det_rest[i][1]) + '_rest')
             id_lst.append(str(i))
 
-    return jsonify({"ids":id_lst, "raw_datas": raw_lst, "fft_datas": fft_lst, "title:": title_lst})
+    return jsonify({"ids":id_lst, "raw_datas": raw_lst, "fft_datas": fft_lst, "title": title_lst})
 
 
 @app.route("/retrain", methods=['POST','GET'])
