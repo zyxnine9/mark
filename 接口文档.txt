@@ -2,7 +2,12 @@
 
 	URL: https://www.jackren.cn/mark/api/files
 	method: GET
-
+	参数: json
+	示例:{
+  		"files": [
+    		"Labeling_Test_Signal.mat"
+  		]
+	}
 2. 上传预训练信息获取标注信息
 
 	URL：https://www.jackren.cn/mark/api/post

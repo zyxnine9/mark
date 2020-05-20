@@ -49,7 +49,8 @@
     <el-button type="primary" @click="$refs.uploadFile.click()">Choose own dataset</el-button>
     <span v-if="selectedFile">Current file is {{ selectedFile.name }}</span>
     <el-button type="primary" @click="onUpload">Upload</el-button>
-
+    <el-progress v-if="uploadProgress" :text-inside="true" :stroke-width="26" :percentage="uploadProgress"></el-progress>
+    <span v-if="uploadHint">{{ uploadHint }}</span>
     <el-button
       :disabled="disabled"
       type="primary"
@@ -94,6 +95,8 @@ export default {
       selectedFile: null,
       fileList: [1, 2, 3],
       markImageNumberOption: [1, 3, 5, 10],
+      uploadProgress: null,
+      uploadHint: null,
 
       user: "",
       chosenFile: "",
@@ -124,7 +127,10 @@ export default {
       console.log(this.selectedFile);
       axios.post(postFile, fd, {
         onUploadProgress : uploadEvent => {
-          console.log('Progress' + Math.round(uploadEvent.loaded / uploadEvent.total * 100) + '%')
+           this.uploadProgress = Math.round(uploadEvent.loaded / uploadEvent.total * 100) 
+           if(this.uploadProgress == 100){
+             this.uploadHint = "上传完成" 
+           }
         }
       }).then(res => {
         console.log(res);
