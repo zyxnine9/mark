@@ -23,6 +23,11 @@ const routes = [
     path: '/train',
     name: 'train',
     component: ()=>import('../views/Train')
+  },
+  {
+    path: '/main',
+    name:'main',
+    component: ()=>import('../views/Main')
   }
 ]
 

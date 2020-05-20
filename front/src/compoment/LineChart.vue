@@ -4,9 +4,6 @@
     <el-col :span="12"><div ref="line_chart1" style="height:60vh;width:100vh"></div></el-col>
     <el-col :span="12"><div ref="line_chart2" style="height:60vh;width:100vh"></div></el-col>
   </el-row>
-  
- 
-
 </div>
  
 </template>

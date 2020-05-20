@@ -20,11 +20,14 @@ from scipy.fftpack import fft
 
 app = Flask(__name__)
 CORS(app)
-path = "../../2020MAR-EMG Labeling Data/labeling.h5"
-origin_path = "../../2020MAR-EMG Labeling Data/Labeling Test Signal.mat"
+# path = "../../2020MAR-EMG Labeling Data/labeling.h5"
+# origin_path = "../../2020MAR-EMG Labeling Data/Labeling Test Signal.mat"
+
+path = "./emg_data.h5"
+origin_path = "./datasets/Labeling_Test_Signal.mat"
 data = scio.loadmat(origin_path)
 
-# path = "./emg_data.h5"
+
 # validation_standard = 0
 # pre_entropy = []
 # deleted_X, deleted_y, deleted_raw, deleted_fft = [], [], [], []
@@ -201,9 +204,19 @@ def retrain():
     return jsonify({'msg':'OK'})
 
 
-@app.route('/test')
+@app.route('/files', methods=['GET'])
 def test():
+    files = os.listdir('./datasets')
+    return jsonify({'files':files})
+
+@app.route('/postfile',methods=['POST'])
+def post_file():
+    file_ = request.files.get('dataset')
+    print(type(file_))
+    name = file_.filename
+    file_.save("./datasets/{}".format(name))
     return jsonify({'msg':'OK'})
+
 
 
 if __name__ == '__main__':

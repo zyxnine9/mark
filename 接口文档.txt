@@ -1,0 +1,39 @@
+1. 获取数据集
+
+	URL: https://www.jackren.cn/mark/api/files
+	method: GET
+
+2. 上传预训练信息获取标注信息
+
+	URL：https://www.jackren.cn/mark/api/post
+	method: POST
+	参数: json
+	示例:{
+		"chosenFile": "xxx.mat",
+		"chosenImageNumber": 5,
+		"user": "zzz",
+		
+	}
+	返回:{
+		ids:[ 1,2 ],
+		title: ['a', 'b'],
+		raw_datas:[
+			[1,-2,3,4],[2,3,4,-5]
+		],
+		fft_datas:[
+			[1,2,3,4],[2,3,4,5]
+		],
+			
+	}
+
+3. 上传并保存数据集文件
+
+	URL：https://www.jackren.cn/mark/api/post
+	method: POST
+	参数: FormData
+	返回: {
+		"msg": "OK"
+	}
+
+4. 上传标注信息
+	待完成
