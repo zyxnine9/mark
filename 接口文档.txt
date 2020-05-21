@@ -3,7 +3,7 @@
 	URL: https://www.jackren.cn/mark/api/files
 	method: GET
 	参数: json
-	示例:{
+	返回:{
   		"files": [
     		"Labeling_Test_Signal.mat"
   		]
