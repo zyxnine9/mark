@@ -27,8 +27,7 @@
 		],
 		fft_datas:[
 			[1,2,3,4],[2,3,4,5]
-		],
-			
+		],		
 	}
 
 3. 上传并保存数据集文件
@@ -48,10 +47,10 @@
     URL：
     method：GET， POST
     参数：
-    后端GET: {
+    示例: {
         "dataset_name":"xxx.mat"
     }
-    POST:{
+    返回:{
         "group_name":[xxx, xxx, xxx]
     }
 

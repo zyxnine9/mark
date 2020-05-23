@@ -20,11 +20,17 @@ from scipy.fftpack import fft
 
 app = Flask(__name__)
 CORS(app)
-# path = "../../2020MAR-EMG Labeling Data/labeling.h5"
-origin_path = "../../2020MAR-EMG Labeling Data/Labeling Test Signal.mat"
 
-path = "./emg_data.h5"
-# origin_path = "./datasets/Labeling_Test_Signal.mat"
+server = True
+
+# 线上路径
+if server:
+    path = "../../2020MAR-EMG Labeling Data/labeling.h5"
+    origin_path = "./datasets/Labeling_Test_Signal.mat"
+else:
+    origin_path = "../../2020MAR-EMG Labeling Data/Labeling Test Signal.mat"
+    path = "./emg_data.h5"
+
 data = scio.loadmat(origin_path)
 
 
@@ -207,8 +213,10 @@ def retrain():
 @app.route('/files', methods=['GET'])
 def test():
     print("this is files")
-    # files = os.listdir('./datasets') #线上路径
-    files = os.listdir('../../2020MAR-EMG Labeling Data') # 线下调试路径
+    if server:
+        files = os.listdir('./datasets') #线上路径
+    else:
+        files = os.listdir('../../2020MAR-EMG Labeling Data') # 线下调试路径
     return jsonify({'files':files})
 
 
@@ -220,6 +228,12 @@ def post_file():
     name = file_.filename
     file_.save("./datasets/{}".format(name))
     return jsonify({'msg':'OK'})
+
+
+@app.route('/group',methods=['POST'])
+def group():
+    print(request.get_json()['dataset_name'])
+    return jsonify({'group_name':['zzz','xxx','lll']})
 
 
 if __name__ == '__main__':
