@@ -21,10 +21,10 @@ from scipy.fftpack import fft
 app = Flask(__name__)
 CORS(app)
 # path = "../../2020MAR-EMG Labeling Data/labeling.h5"
-# origin_path = "../../2020MAR-EMG Labeling Data/Labeling Test Signal.mat"
+origin_path = "../../2020MAR-EMG Labeling Data/Labeling Test Signal.mat"
 
 path = "./emg_data.h5"
-origin_path = "./datasets/Labeling_Test_Signal.mat"
+# origin_path = "./datasets/Labeling_Test_Signal.mat"
 data = scio.loadmat(origin_path)
 
 
@@ -206,17 +206,20 @@ def retrain():
 
 @app.route('/files', methods=['GET'])
 def test():
-    files = os.listdir('./datasets')
+    print("this is files")
+    # files = os.listdir('./datasets') #线上路径
+    files = os.listdir('../../2020MAR-EMG Labeling Data') # 线下调试路径
     return jsonify({'files':files})
+
 
 @app.route('/postfile',methods=['POST'])
 def post_file():
+    print("this is postfile")
     file_ = request.files.get('dataset')
     print(type(file_))
     name = file_.filename
     file_.save("./datasets/{}".format(name))
     return jsonify({'msg':'OK'})
-
 
 
 if __name__ == '__main__':

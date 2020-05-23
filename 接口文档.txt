@@ -42,3 +42,16 @@
 
 4. 上传标注信息
 	待完成
+
+5. 加载数据集并返回数据集group选项
+
+    URL：
+    method：GET， POST
+    参数：
+    后端GET: {
+        "dataset_name":"xxx.mat"
+    }
+    POST:{
+        "group_name":[xxx, xxx, xxx]
+    }
+
