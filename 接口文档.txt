@@ -46,7 +46,16 @@
 	}
 
 4. 上传标注信息
-	待完成
+	URL: /retrain
+	示例:{
+		"id": [1,2],
+		"title": ["xxx","xxx"],
+		"label": [1,2],
+		"start_time":[1,2],
+		"end_time":[1,2]
+
+	}
+
 
 5. 加载数据集并返回数据集group选项
 
