@@ -21,18 +21,18 @@ from scipy.fftpack import fft
 app = Flask(__name__)
 CORS(app)
 
-server = True
+server = False
 
 # 线上路径
 if server:
     path = "../../2020MAR-EMG Labeling Data/labeling.h5"
     origin_path = "./datasets/Labeling_Test_Signal.mat"
 else:
-    origin_path = "../../2020MAR-EMG Labeling Data/Labeling Test Signal.mat"
+    origin_path = "../../2020MAR-EMG Labeling Data/"
     path = "./emg_data.h5"
 
-data = scio.loadmat(origin_path)
 
+data = None
 
 # validation_standard = 0
 # pre_entropy = []
@@ -43,7 +43,7 @@ det_active = []
 rest = []
 det_rest = []
 
-name = 'NAAC_s18081064wct_Train15_HandOpen'
+# name = 'NAAC_s18081064wct_Train15_HandOpen'
 number = 0
 channel = 1
 
@@ -68,7 +68,7 @@ channel = 1
 # from flask import render_template, jsoçnify
 
 
-@app.route("/train",methods=['POST'])
+# @app.route("/train",methods=['POST'])
 def train():
     # CNN部分
     # global pre_entropy, model
@@ -101,9 +101,13 @@ def train():
     # pre_entropy = train_features.entropy(y_pool_prob)
 
     global activate, det_active, rest, det_rest
+    activate = []
+    det_active = []
+    rest = []
+    det_rest = []
 
-
-
+    name = request.get_json()["user"]
+    print(name)
     signal = data[name][0][number]
 
     for length in {2000, 4000, 6000}:
@@ -122,12 +126,14 @@ def train():
                 rest.append(signal[i:i + length, channel])
                 det_rest.append([i, i + length, y_test_prob[0][1]])
     print("success")
-    return jsonify({"a":"123","b":"445"})
+    # return jsonify({"a":"123","b":"445"})
 
 
 @app.route("/post", methods=['POST','GET'])
 def post_num():
-    num = request.get_json()['value']
+    train()
+    num = request.get_json()['chosenImageNumber']
+    name = request.get_json()['user']
     # 这里应该是一个返回id_list,img_list的函数，随便示例一下
     # img_lst = []
     raw_lst = []
@@ -233,7 +239,11 @@ def post_file():
 @app.route('/group',methods=['POST'])
 def group():
     print(request.get_json()['dataset_name'])
-    return jsonify({'group_name':['zzz','xxx','lll']})
+    global data
+    path_choosed = request.get_json()['dataset_name']
+    data = scio.loadmat(origin_path+path_choosed)
+
+    return jsonify({'group_name':list(data.keys())})
 
 
 if __name__ == '__main__':

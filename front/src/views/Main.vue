@@ -185,13 +185,13 @@ export default {
       console.log(info);
       this.data = emg;
       // TODO 网络请求
-      // axios.post(postValue,info).then(
-      //   res=>{
-      //     this.data = res.data
-      //   }
-      // ).catch(error=>{
-      //   console.log(error)
-      // })
+      axios.post(postValue,info).then(
+        res=>{
+          this.data = res.data
+        }
+      ).catch(error=>{
+        console.log(error)
+      })
     },
     toNext() {
       console.log('next')
