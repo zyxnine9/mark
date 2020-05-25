@@ -18,6 +18,7 @@ import scipy.io as scio
 from scipy.fftpack import fft
 
 
+
 app = Flask(__name__)
 CORS(app)
 
@@ -38,10 +39,8 @@ data = None
 # pre_entropy = []
 # deleted_X, deleted_y, deleted_raw, deleted_fft = [], [], [], []
 
-activate = []
-det_active = []
-rest = []
-det_rest = []
+info_signal = []
+det_signal = []
 
 # name = 'NAAC_s18081064wct_Train15_HandOpen'
 number = 0
@@ -100,16 +99,14 @@ def train():
     # y_pool_prob = lgb_clf.predict(X_test)
     # pre_entropy = train_features.entropy(y_pool_prob)
 
-    global activate, det_active, rest, det_rest
-    activate = []
-    det_active = []
-    rest = []
-    det_rest = []
+    global info_signal, det_signal
+    info_signal = []
+    det_signal = []
 
     name = request.get_json()["user"]
     print(name)
     signal = data[name][0][number]
-
+    count = {0: 0, 1: 0}
     for length in {2000, 4000, 6000}:
         for i in range(0, signal.shape[0], length // 4):
             if i + length > signal.shape[0]:
@@ -119,12 +116,12 @@ def train():
             y_test_prob = lgb_clf.predict(tmp_feature)
             y_test_pred = np.argmax(y_test_prob, axis=1)
             y_test_pred = int(y_test_pred)
-            if y_test_pred == 0:
-                activate.append(signal[i:i + length, channel])
-                det_active.append([i, i + length, y_test_prob[0][0]])
-            if y_test_pred == 1:
-                rest.append(signal[i:i + length, channel])
-                det_rest.append([i, i + length, y_test_prob[0][1]])
+
+            if y_test_pred == 0 or y_test_pred == 1:
+                count[y_test_pred] += 1
+                det_signal.append(signal[i:i + length, channel])
+                info_signal.append([i, i + length, y_test_prob[0][0], y_test_pred])
+    print(count)
     print("success")
     # return jsonify({"a":"123","b":"445"})
 
@@ -132,7 +129,7 @@ def train():
 @app.route("/post", methods=['POST','GET'])
 def post_num():
     train()
-    num = request.get_json()['chosenImageNumber']
+
     name = request.get_json()['user']
     # 这里应该是一个返回id_list,img_list的函数，随便示例一下
     # img_lst = []
@@ -147,19 +144,20 @@ def post_num():
     # selected, selected_entropy = data_process.select(pre_entropy, 0, 10)
     # deleted_X, deleted_y, deleted_raw, deleted_fft, X_pool, y_pool, raw_pool, fft_pool = data_process.delete_from_pool(X_pool, y_pool, raw_pool, fft_pool, selected)
     # print(X_pool.shape)
-    if num == 0:
-        keep = train_features.py_cpu_nms(np.array(det_active), 0.2)
-        for i in keep:
-            fft_signal = fft(activate[i])
-            P2 = abs(fft_signal / len(fft_signal))
-            P1 = P2[1:len(P2) // 2 + 1]
-            P1[2:-1] = 2 * P1[2:-1]
-            # img_lst.append(img_base64)
-            raw_lst.append(activate[i].tolist())
-            fft_lst.append(P1.tolist())
-            title_lst.append(name + '_0_' + str(number) + '_channel' + str(channel)+ '_start' + str(det_active[i][0]) + '_end' + str(det_active[i][1]) + '_activate')
-            id_lst.append(str(i))
-    else:
+
+    keep = train_features.py_cpu_nms(np.array(info_signal), 0.2)
+    for i in keep:
+        fft_signal = fft(det_signal[i])
+        P2 = abs(fft_signal / len(fft_signal))
+        P1 = P2[1:len(P2) // 2 + 1]
+        P1[2:-1] = 2 * P1[2:-1]
+        # img_lst.append(img_base64)
+        raw_lst.append(det_signal[i].tolist())
+        fft_lst.append(P1.tolist())
+        result = "_rest" if info_signal[i][3] else "_activate"
+        title_lst.append(name + '_0_' + str(number) + '_channel' + str(channel)+ '_start' + str(info_signal[i][0]) + '_end' + str(info_signal[i][1]) + result)
+        id_lst.append(str(i))
+
         # print(selected_entropy[i])
         # x_fft = np.arange(0, len(deleted_fft[i]))
         # x_raw = np.arange(0, len(deleted_raw[i]))
@@ -183,17 +181,6 @@ def post_num():
         # fig.savefig(sio, format='png')
         # img_base64 = base64.b64encode(sio.getvalue()).decode('utf8')
         # img_lst.append(img_base64)
-        keep = train_features.py_cpu_nms(np.array(det_rest), 0.2)
-        for i in keep:
-            fft_signal = fft(rest[i])
-            P2 = abs(fft_signal / len(fft_signal))
-            P1 = P2[1:len(P2) // 2 + 1]
-            P1[2:-1] = 2 * P1[2:-1]
-            # img_lst.append(img_base64)
-            raw_lst.append(rest[i].tolist())
-            fft_lst.append(P1.tolist())
-            title_lst.append(name + '_0_' + str(number) + '_channel' + str(channel) + '_start' + str(det_rest[i][0]) + '_end' + str(det_rest[i][1]) + '_rest')
-            id_lst.append(str(i))
 
     return jsonify({"ids":id_lst, "raw_datas": raw_lst, "fft_datas": fft_lst, "title": title_lst})
 
