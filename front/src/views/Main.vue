@@ -63,6 +63,7 @@
       <span v-if="uploadHint">{{ uploadHint }}</span>
     </div>
 
+    <!--上传信息获取数据-->
     <el-button
       :disabled="disabled"
       type="primary"
@@ -70,6 +71,7 @@
       v-loading.fullscreen.lock="fullscreenLoading"
     >Detect</el-button>
 
+    <!--标注模块-->
     <div v-if="data">
       <el-carousel
         :autoplay="false"
@@ -79,8 +81,10 @@
         height="80vh"
         ref="ques"
       >
-        <el-carousel-item v-for="(item,i) in data.ids" :key="i">
+        <el-carousel-item v-for="(item,i) in data.ids.slice(0,chosenImageNumber)" :key="i">
           <!-- <img v-bind:src="'data:image/jpeg;base64,'+img" /> -->
+          <p>{{data.ids[i]}}</p>
+          <p>{{data.title[i]}}</p>
           <LineChart :fftdata="data.fft_datas[i]" :rawdata="data.raw_datas[i]" />
         </el-carousel-item>
       </el-carousel>
@@ -92,12 +96,22 @@
       <p>{{labels}}</p>
       <p>{{index}}</p>
     </div>
+
+    <div>
+      <el-dialog title="Hint" :visible.sync="dialogVisible" width="30%">
+        <span>You have finished the annotation work, please sumbit the result</span>
+        <span slot="footer" class="dialog-footer">
+          <el-button @click="dialogVisible = false">Cancel</el-button>
+          <el-button type="primary" @click="retrain">Accept</el-button>
+        </span>
+      </el-dialog>
+    </div>
   </div>
 </template>
 
 <script>
 import axios from "axios";
-import { files, postFile, group,postValue } from "../assets/api";
+import { files, postFile, group, postValue, retrain } from "../assets/api";
 import { emg } from "../assets/emg";
 import LineChart from "../compoment/LineChart";
 
@@ -107,17 +121,18 @@ export default {
     return {
       fullscreenLoading: false,
       disabled: false,
+      uploadProgress: null,
+      uploadHint: null,
+
       selectedFile: null,
       fileList: [1, 2, 3],
       markImageNumberOption: [1, 3, 5, 10],
-      uploadProgress: null,
-      uploadHint: null,
 
       user: "",
       chosenFile: undefined,
       chosenImageNumber: null,
-      groupList: null,
 
+      groupList: null,
       options: ["Active", "Rest", "Noisy", "Unknown"],
       index: 0,
       data: null,
@@ -136,6 +151,16 @@ export default {
         .catch(error => {
           console.log(error);
         });
+    }
+  },
+
+  computed: {
+    dialogVisible() {
+      if (this.index == this.chosenImageNumber) {
+        return true;
+      } else {
+        return false;
+      }
     }
   },
   methods: {
@@ -176,25 +201,31 @@ export default {
     },
     // 训练模型,获取fft数据
     detect() {
-      this.disabled = false;
+      this.disabled = true;
       const info = {
         user: this.user,
         chosenFile: this.chosenFile,
         chosenImageNumber: this.chosenImageNumber
       };
       console.log(info);
-      this.data = emg;
+      this.fullscreenLoading = true;
+      // this.data = emg;
       // TODO 网络请求
-      axios.post(postValue,info).then(
-        res=>{
-          this.data = res.data
-        }
-      ).catch(error=>{
-        console.log(error)
-      })
+      axios
+        .post(postValue, info)
+        .then(res => {
+          this.data = res.data;
+          console.log(this.data);
+          this.fullscreenLoading = false;
+        })
+        .catch(error => {
+          console.log(error);
+          this.fullscreenLoading = false;
+          this.$message("网络错误");
+        });
     },
     toNext() {
-      console.log('next')
+      console.log("next");
       this.index++;
       this.$refs.ques.next();
     },
@@ -202,39 +233,37 @@ export default {
     canToNextPage() {
       return (
         this.labels[this.index] != undefined &&
-        (this.index < this.data.ids.length )
+        // (this.index < this.data.ids.length )
+        this.index < this.chosenImageNumber
       );
     },
     canPost() {
       return (
         this.labels[this.index] != undefined &&
-        (this.index == this.data.ids.length)
+        // (this.index == this.data.ids.length)
+        this.index == this.chosenImageNumber
       );
-    },
-    submit() {
-      console.log("canToNextPage  " + this.canToNextPage());
-      console.log("can Post" + this.canPost());
-
-      if (this.canToNextPage()) {
-        this.toNext();
-      } else if (this.canPost()) {
-        this.dialogVisible = true;
-        // this.postData();
-      } else {
-        this.$message({
-          message: "请标注",
-          type: "warning"
-        });
-      }
     },
     mark(i) {
       this.labels[this.index] = i;
       if (this.canToNextPage()) this.toNext();
-      console.log(this.index)
-      console.log(this.data.ids.length)
+      console.log(this.index);
+      console.log(this.data.ids.length);
       if (this.canPost()) {
         this.$message("标注完了");
       }
+    },
+    retrain() {
+      const info = {
+        ids: this.data.ids.slice(0, this.chosenImageNumber),
+        titles: this.data.title.slice(0, this.chosenImageNumber),
+        labels: this.labels
+      };
+      axios.post(retrain, info).then(res=>{
+        this.$message("finished")
+      }).catch(error=>{
+        this.$message("error")
+      });
     }
   },
   mounted() {

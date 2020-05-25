@@ -46,14 +46,20 @@
 	}
 
 4. 上传标注信息
-	URL: /retrain
+	URL: https://www.jackren.cn/mark/api/retrain
+	method: POST
+	参数: json
 	示例:{
-		"id": [1,2],
-		"title": ["xxx","xxx"],
-		"label": [1,2],
-		"start_time":[1,2],
-		"end_time":[1,2]
+		"ids": [1,2],
+		"titles": ["xxx","xxx"],
+		"labels": [1,2],
 
+	}
+	
+	返回格式待定
+
+	返回:{
+		"msg":"OK"
 	}
 
 
