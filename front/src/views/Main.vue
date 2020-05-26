@@ -43,7 +43,7 @@
           placeholder="please choose the number"
         >
           <el-option
-            v-for="(item,index) in markImageNumberOption"
+            v-for="(item,index) in signalNumberOption"
             :key="index"
             :label="item"
             :value="item"
@@ -133,7 +133,7 @@
 <script>
 import axios from "axios";
 import { files, postFile, group, postValue, retrain } from "../assets/api";
-import { download } from "../assets/api";
+import { number } from '../assets/api'
 import LineChart from "../compoment/LineChart";
 
 export default {
@@ -147,7 +147,8 @@ export default {
 
       selectedFile: null,
       fileList: [1, 2, 3],
-      markImageNumberOption: [1, 3, 5, 10],
+      markImageNumberOption: [0,1,2,3],
+      signalNumberOption:[],
 
       groupName: "",
       chosenFile: undefined,
@@ -174,7 +175,19 @@ export default {
         .catch(error => {
           console.log(error);
         });
+    },
+    groupName: function() {
+      axios
+      .get(number + '?groupName='+this.groupName)
+      .then(res=>{
+        const number = res.data.signalNumber
+        this.signalNumberOption = [...Array(number+1).keys()]
+      })
+      .catch(error=>{
+        console.log(error)
+      })
     }
+
   },
 
   computed: {
@@ -225,8 +238,8 @@ export default {
     // 训练模型,获取fft数据
     detect() {
       if (
-        this.chosenSignalChannel &&
-        this.chosenSignalNumber &&
+        this.chosenSignalChannel != null &&
+        this.chosenSignalNumber != null &&
         this.chosenFile &&
         this.groupName
       ) {
@@ -235,7 +248,7 @@ export default {
           groupName: this.groupName,
           chosenFile: this.chosenFile,
           chosenSignalNumber: 1,
-          chosenSignalChannel: 10
+          chosenSignalChannel: 2,
         };
         console.log(info);
         this.fullscreenLoading = true;

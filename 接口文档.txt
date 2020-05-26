@@ -78,13 +78,13 @@
 
 6. 加载group返回number选项
 
-    URL：
-    method：GET， POST
+    URL：https://www.jackren.cn/mark/api/number?groupName=xxx
+    method：GET
     参数：
     示例: {
-        "group_name":"xxx"
+        "groupName":"xxx"
     }
     返回:{
-        "number": 0 or 1 or 2
+        "signalNumber": 0 or 1 or 2
     }
 

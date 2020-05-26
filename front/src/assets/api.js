@@ -6,4 +6,4 @@ export const retrain = baseURL + "retrain"
 export const files = baseURL + 'files'
 export const postFile = baseURL + 'postfile'
 export const group = baseURL + 'group'
-export const download = baseURL + "download"
+export const number = baseURL + 'number'

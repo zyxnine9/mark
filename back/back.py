@@ -323,5 +323,13 @@ def group():
 def download():
     return send_from_directory(directory="./", filename="labels_csv.csv", as_attachment=True)
 
+
+@app.route('/number', methods=['GET'])
+def number():
+    group_name = request.args.get('groupName')
+    return jsonify({"signalNumber":2})
+
+
+
 if __name__ == '__main__':
     app.run(debug=True)

@@ -1,11 +1,14 @@
 <template>
-<div>
-  <el-row>
-    <el-col :span="12"><div ref="line_chart1" style="height:60vh;width:100vh"></div></el-col>
-    <el-col :span="12"><div ref="line_chart2" style="height:60vh;width:100vh"></div></el-col>
-  </el-row>
-</div>
- 
+  <div>
+    <el-row>
+      <el-col :span="12">
+        <div ref="line_chart2" style="height:60vh;width:100vh"></div>
+      </el-col>
+      <el-col :span="12">
+        <div ref="line_chart1" style="height:60vh;width:100vh"></div>
+      </el-col>
+    </el-row>
+  </div>
 </template>
 
 <script>
@@ -62,21 +65,44 @@ export default {
           trigger: "axis",
           formatter: function(params) {
             params = params[0];
-            return params.value[1];
+            return (
+              "X: " +
+              params.value[0] +
+              "<br/>" +
+              "Y: " +
+              params.value[1] +
+              "<br/>"
+            );
           },
           axisPointer: {
             animation: false
           }
         },
+        color: ["#3398DB"],
         xAxis: {
           type: "value",
+          name: "Frequency",
+          position: "bottom",
+          nameLocation: "center",
+          nameGap: 25,
+          nameTextStyle: {
+            fontSize: 18
+          },
           splitLine: {
             show: false
           }
         },
         yAxis: {
           type: "value",
-        //   boundaryGap: [0, ],
+          name: "Amplitude",
+          nameGap: 50,
+          max: 0.003,
+          min: 0,
+          nameLocation: "center",
+          nameTextStyle: {
+            fontSize: 18
+          },
+          //   boundaryGap: [0, ],
           splitLine: {
             show: false
           }
@@ -90,7 +116,7 @@ export default {
           }
         ]
       };
-       let option2 = {
+      let option2 = {
         title: {
           text: "EMG RAW"
         },
@@ -98,21 +124,44 @@ export default {
           trigger: "axis",
           formatter: function(params) {
             params = params[0];
-            return params.value[1];
+            return (
+              "X: " +
+              params.value[0] +
+              "<br/>" +
+              "Y: " +
+              params.value[1] +
+              "<br/>"
+            );
           },
           axisPointer: {
             animation: false
           }
         },
+        color: ["#3398DB"],
         xAxis: {
           type: "value",
+          name: "Milisecond",
+          position: "bottom",
+          nameLocation: "center",
+          nameGap: 25,
+          nameTextStyle: {
+            fontSize: 18
+          },
           splitLine: {
             show: false
           }
         },
         yAxis: {
           type: "value",
-        //   boundaryGap: [0, ],
+          nameGap: 40,
+          max: 0.09,
+          min: -0.09,
+          name: "Voltage",
+          nameLocation: "center",
+          nameTextStyle: {
+            fontSize: 18
+          },
+          //   boundaryGap: [0, ],
           splitLine: {
             show: false
           }
@@ -122,7 +171,7 @@ export default {
             type: "line",
             showSymbol: false,
             hoverAnimation: false,
-            data: this.RAWData,
+            data: this.RAWData
           }
         ]
       };
@@ -132,11 +181,11 @@ export default {
       lineChart2.setOption(option2);
     }
   },
-  mounted(){
-      this.drawLineChart()
+  mounted() {
+    this.drawLineChart();
   },
-  updated(){
-      this.drawLineChart()
+  updated() {
+    this.drawLineChart();
   }
 };
 </script>
