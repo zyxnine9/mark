@@ -56,7 +56,7 @@ export default {
     drawLineChart() {
       let option1 = {
         title: {
-          text: "EMG数据FFT"
+          text: "EMG FFT"
         },
         tooltip: {
           trigger: "axis",
@@ -92,7 +92,7 @@ export default {
       };
        let option2 = {
         title: {
-          text: "EMG数据RAW"
+          text: "EMG RAW"
         },
         tooltip: {
           trigger: "axis",

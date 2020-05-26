@@ -1,5 +1,6 @@
 #coding:utf-8
 from flask import Flask, render_template, jsonify, Response, request
+from flask import send_from_directory
 from flask_cors import CORS
 # from PIL import Image
 import json, os
@@ -25,12 +26,12 @@ import math
 app = Flask(__name__)
 CORS(app)
 
-server = False
+server = True
 
 # 线上路径
 if server:
     path = "../../2020MAR-EMG Labeling Data/labeling.h5"
-    origin_path = "./datasets/Labeling_Test_Signal.mat"
+    origin_path = "./datasets/"
 else:
     origin_path = "../../2020MAR-EMG Labeling Data/"
     path = "./emg_data.h5"
@@ -106,7 +107,7 @@ def train():
     info_signal = []
     det_signal = []
 
-    name = request.get_json()["user"]
+    name = request.get_json()["groupName"]
     print(name)
     signal = data[name][0][number]
     count = {0: 0, 1: 0}
@@ -131,7 +132,13 @@ def train():
 
 @app.route("/post", methods=['POST','GET'])
 def post_num():
-    name = request.get_json()['user']
+    # change by zyx 
+    # 测试接口
+    name = request.get_json()['groupName']
+    chosen_signal_number = request.get_json()['chosenSignalNumber']
+    chosen_signal_channel = request.get_json()['chosenSignalChannel']
+    print(chosen_signal_channel)
+    print(chosen_signal_number)
     f = csv.reader(open('groups.csv', 'r', encoding='utf-8'))
     grouplist = []
     raw_lst = []
@@ -311,6 +318,10 @@ def group():
 
     return jsonify({'group_name':list(data.keys())})
 
+
+@app.route('/download')
+def download():
+    return send_from_directory(directory="./", filename="labels_csv.csv", as_attachment=True)
 
 if __name__ == '__main__':
     app.run(debug=True)

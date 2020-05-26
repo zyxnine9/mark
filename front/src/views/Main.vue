@@ -1,5 +1,6 @@
 <template>
   <div>
+    <h1 style="text-align:center">Online Annotation System</h1>
     <!--基本信息填写-->
     <el-row class="block">
       <el-col :span="12">File Name</el-col>
@@ -14,13 +15,12 @@
         </el-select>
       </el-col>
     </el-row>
-
     <el-row class="block">
-      <el-col :span="12">Number Of Image</el-col>
+      <el-col :span="12">Signal Channel</el-col>
       <el-col :span="12">
         <el-select
           class="option"
-          v-model="chosenImageNumber"
+          v-model="chosenSignalChannel"
           :disabled="disabled"
           placeholder="please choose the number"
         >
@@ -33,13 +33,30 @@
         </el-select>
       </el-col>
     </el-row>
-
+    <el-row class="block">
+      <el-col :span="12">Signal Number</el-col>
+      <el-col :span="12">
+        <el-select
+          class="option"
+          v-model="chosenSignalNumber"
+          :disabled="disabled"
+          placeholder="please choose the number"
+        >
+          <el-option
+            v-for="(item,index) in markImageNumberOption"
+            :key="index"
+            :label="item"
+            :value="item"
+          ></el-option>
+        </el-select>
+      </el-col>
+    </el-row>
     <el-row class="block">
       <el-col :span="12">Current Group</el-col>
       <el-col :span="12">
         <el-select
           class="option"
-          v-model="user"
+          v-model="groupName"
           :disabled="disabled"
           placeholder="please choose the group"
         >
@@ -49,11 +66,13 @@
     </el-row>
 
     <!--上传文件-->
-    <div>
+    <div style="text-align:center">
       <input style="display: none" type="file" @change="onFileSelected" ref="uploadFile" />
       <el-button type="primary" @click="$refs.uploadFile.click()">Choose own dataset</el-button>
-      <span v-if="selectedFile">Current file is {{ selectedFile.name }}</span>
-      <el-button type="primary" @click="onUpload">Upload</el-button>
+      <el-button type="primary" v-if="selectedFile != null" @click="onUpload">Upload</el-button>
+      <el-row>
+        <span v-if="selectedFile">Current file is {{ selectedFile.name }}</span>
+      </el-row>
       <el-progress
         v-if="uploadProgress"
         :text-inside="true"
@@ -62,14 +81,16 @@
       ></el-progress>
       <span v-if="uploadHint">{{ uploadHint }}</span>
     </div>
+    <br />
 
-    <!--上传信息获取数据-->
-    <el-button
-      :disabled="disabled"
-      type="primary"
-      @click="detect"
-      v-loading.fullscreen.lock="fullscreenLoading"
-    >Detect</el-button>
+    <div style="text-align:center">
+      <!-- 上传信息获取数据-->
+      <el-button type="primary" @click="detect" v-loading.fullscreen.lock="fullscreenLoading">Start</el-button>
+
+      <!-- 下载文件 -->
+      <el-button type="primary" @click="$refs.download.click()">Download</el-button>
+      <a style="display:none" ref="download" href="https://www.jackren.cn/mark/api/download">file</a>
+    </div>
 
     <!--标注模块-->
     <div v-if="data">
@@ -101,7 +122,7 @@
       <el-dialog title="Hint" :visible.sync="dialogVisible" width="30%">
         <span>You have finished the annotation work, please sumbit the result</span>
         <span slot="footer" class="dialog-footer">
-          <el-button @click="dialogVisible = false">Cancel</el-button>
+          <!-- <el-button @click="dialogVisible = false">Cancel</el-button> -->
           <el-button type="primary" @click="retrain">Accept</el-button>
         </span>
       </el-dialog>
@@ -112,7 +133,7 @@
 <script>
 import axios from "axios";
 import { files, postFile, group, postValue, retrain } from "../assets/api";
-import { emg } from "../assets/emg";
+import { download } from "../assets/api";
 import LineChart from "../compoment/LineChart";
 
 export default {
@@ -128,9 +149,11 @@ export default {
       fileList: [1, 2, 3],
       markImageNumberOption: [1, 3, 5, 10],
 
-      user: "",
+      groupName: "",
       chosenFile: undefined,
-      chosenImageNumber: null,
+      chosenImageNumber: 10,
+      chosenSignalChannel: null,
+      chosenSignalNumber: null,
 
       groupList: null,
       options: ["Active", "Rest", "Noisy", "Unknown"],
@@ -201,35 +224,44 @@ export default {
     },
     // 训练模型,获取fft数据
     detect() {
-      this.disabled = true;
-      const info = {
-        user: this.user,
-        chosenFile: this.chosenFile,
-        chosenImageNumber: this.chosenImageNumber
-      };
-      console.log(info);
-      this.fullscreenLoading = true;
-      // this.data = emg;
-      // TODO 网络请求
-      axios
-        .post(postValue, info)
-        .then(res => {
-          this.data = res.data;
-          console.log(this.data);
-          this.fullscreenLoading = false;
-        })
-        .catch(error => {
-          console.log(error);
-          this.fullscreenLoading = false;
-          this.$message("网络错误");
-        });
+      if (
+        this.chosenSignalChannel &&
+        this.chosenSignalNumber &&
+        this.chosenFile &&
+        this.groupName
+      ) {
+        this.disabled = true;
+        const info = {
+          groupName: this.groupName,
+          chosenFile: this.chosenFile,
+          chosenSignalNumber: 1,
+          chosenSignalChannel: 10
+        };
+        console.log(info);
+        this.fullscreenLoading = true;
+        // this.data = emg;
+        // TODO 网络请求
+        axios
+          .post(postValue, info)
+          .then(res => {
+            this.data = res.data;
+            console.log(this.data);
+            this.fullscreenLoading = false;
+          })
+          .catch(error => {
+            console.log(error);
+            this.fullscreenLoading = false;
+            this.$message("网络错误");
+          });
+      } else {
+        this.$message("please complete the table");
+      }
     },
+    // 标记相关功能
     toNext() {
-      console.log("next");
       this.index++;
       this.$refs.ques.next();
     },
-
     canToNextPage() {
       return (
         this.labels[this.index] != undefined &&
@@ -247,23 +279,28 @@ export default {
     mark(i) {
       this.labels[this.index] = i;
       if (this.canToNextPage()) this.toNext();
-      console.log(this.index);
-      console.log(this.data.ids.length);
       if (this.canPost()) {
         this.$message("标注完了");
       }
     },
+    // 上传label
     retrain() {
       const info = {
         ids: this.data.ids.slice(0, this.chosenImageNumber),
         titles: this.data.title.slice(0, this.chosenImageNumber),
         labels: this.labels
       };
-      axios.post(retrain, info).then(res=>{
-        this.$message("finished")
-      }).catch(error=>{
-        this.$message("error")
-      });
+      axios
+        .post(retrain, info)
+        .then(res => {
+          this.$message("finished");
+          this.index = 0;
+          this.data = null;
+          this.labels = [];
+        })
+        .catch(error => {
+          this.$message("error");
+        });
     }
   },
   mounted() {

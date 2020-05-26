@@ -15,9 +15,9 @@
 	参数: json
 	示例:{
 		"chosenFile": "xxx.mat",
-		"chosensignalnumber": 1,
-		"choosensignalchannel",1
-		"groupname": "zzz",
+		"chosenSignalNumber": 1,
+		"chosenSignalChannel",1
+		"groupName": "zzz",
 		
 	}
 	返回:{

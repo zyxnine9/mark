@@ -1,4 +1,4 @@
-from flask import Flask, render_template, jsonify, Response, request
+from flask import Flask, render_template, jsonify, Response, request ,send_from_directory
 from flask_cors import CORS
 
 
@@ -16,6 +16,11 @@ def test():
 def group():
     print(request.get_json()['dataset_name'])
     return jsonify({'group_name':['zzz','xxx','lll']})
+
+
+@app.route("/download")
+def index():
+    return send_from_directory(r"./",filename="test.py",as_attachment=True)
 
 if __name__ == '__main__':
     app.run(debug=True)
