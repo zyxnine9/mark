@@ -16,6 +16,9 @@ from sklearn.cluster import k_means
 import train_features
 import scipy.io as scio
 from scipy.fftpack import fft
+import csv
+import pandas as pd
+import math
 
 
 
@@ -128,15 +131,94 @@ def train():
 
 @app.route("/post", methods=['POST','GET'])
 def post_num():
-    train()
-
     name = request.get_json()['user']
-    # 这里应该是一个返回id_list,img_list的函数，随便示例一下
-    # img_lst = []
+    f = csv.reader(open('groups.csv', 'r', encoding='utf-8'))
+    grouplist = []
     raw_lst = []
     fft_lst = []
     title_lst = []
-    id_lst= []
+    id_lst = []
+    for i in f:
+        if len(i) == 0:
+            continue
+        grouplist.append(i[0])
+    print(grouplist)
+    begin_index = 0
+    end_index = len(open('labels_csv.csv').readlines())-1 if os.path.exists('labels_csv.csv') else 0
+    if name+str(number)+str(channel) in grouplist: # 判断之前是否detect过
+        file = pd.read_csv('./labels_csv.csv')
+        f = pd.DataFrame(file)
+        print(f.head())
+        flag = False
+        for i, info in enumerate(f.itertuples()):
+
+            if getattr(info, 'group_name') == name and getattr(info, 'number') == number and getattr(info, 'channel') == channel:
+
+                if math.isnan(getattr(info, 'label')) and flag is False:
+                    begin_index = i
+                    flag = True
+            else:
+                if flag:
+                    end_index = i
+                    break
+        print(begin_index, end_index)
+        for i in range(begin_index, end_index):
+
+            tmp_signal = data[name][0][number][int(f.loc[i, "start_time"]):int(f.loc[i, "end_time"]), channel]
+
+            raw_lst.append(tmp_signal.tolist())
+            fft_signal = fft(tmp_signal)
+            P2 = abs(fft_signal / len(fft_signal))
+            P1 = P2[1:len(P2) // 2 + 1]
+            P1[2:-1] = 2 * P1[2:-1]
+            # img_lst.append(img_base64)
+            fft_lst.append(P1.tolist())
+            result = "from_csv"
+            title_lst.append(name + '_0_' + str(number) + '_channel' + str(channel) + '_start' + str(
+                int(f.loc[i, "start_time"])) + '_end' + str(f.loc[i, "end_time"]) + result)
+            id_lst.append(str(i))
+
+    else:
+        with open('groups.csv', 'a+', newline='')as f:
+            writer = csv.writer(f)
+            tmp = name+str(number)+str(channel)
+            print(tmp)
+            writer.writerow([tmp])
+            f.close()
+        train()
+        keep = train_features.py_cpu_nms(np.array(info_signal), 0.2)
+        begin_index = len(open('labels_csv.csv').readlines())-1 if os.path.exists('labels_csv.csv') else 0
+        if os.path.exists('labels_csv.csv'):
+            file = pd.read_csv('./labels_csv.csv')
+            df = pd.DataFrame(file)
+        else:
+            df = pd.DataFrame(columns=['group_name', 'number', 'channel', 'start_time', 'end_time', 'label'])
+
+        for i in keep:
+
+            df = df.append({"group_name": name, "number":number, "channel":channel, "start_time":info_signal[i][0], "end_time":info_signal[i][1]}, ignore_index=True)
+
+        print(df.head())
+        df.to_csv('./labels_csv.csv', index=False)
+
+        for num, i in enumerate(keep):
+            fft_signal = fft(det_signal[i])
+            P2 = abs(fft_signal / len(fft_signal))
+            P1 = P2[1:len(P2) // 2 + 1]
+            P1[2:-1] = 2 * P1[2:-1]
+            # img_lst.append(img_base64)
+            raw_lst.append(det_signal[i].tolist())
+            fft_lst.append(P1.tolist())
+            result = "_rest" if info_signal[i][3] else "_activate"
+            title_lst.append(name + '_0_' + str(number) + '_channel' + str(channel) + '_start' + str(
+                info_signal[i][0]) + '_end' + str(info_signal[i][1]) + result)
+            id_lst.append(str(num+begin_index))
+
+
+
+    # 这里应该是一个返回id_list,img_list的函数，随便示例一下
+    # img_lst = []
+
     # global pre_entropy
     # global X_pool, X_train, y_pool, y_train, deleted_X, deleted_y, deleted_raw, deleted_fft, raw_pool, fft_pool
     # print(X_pool.shape)
@@ -144,19 +226,6 @@ def post_num():
     # selected, selected_entropy = data_process.select(pre_entropy, 0, 10)
     # deleted_X, deleted_y, deleted_raw, deleted_fft, X_pool, y_pool, raw_pool, fft_pool = data_process.delete_from_pool(X_pool, y_pool, raw_pool, fft_pool, selected)
     # print(X_pool.shape)
-
-    keep = train_features.py_cpu_nms(np.array(info_signal), 0.2)
-    for i in keep:
-        fft_signal = fft(det_signal[i])
-        P2 = abs(fft_signal / len(fft_signal))
-        P1 = P2[1:len(P2) // 2 + 1]
-        P1[2:-1] = 2 * P1[2:-1]
-        # img_lst.append(img_base64)
-        raw_lst.append(det_signal[i].tolist())
-        fft_lst.append(P1.tolist())
-        result = "_rest" if info_signal[i][3] else "_activate"
-        title_lst.append(name + '_0_' + str(number) + '_channel' + str(channel)+ '_start' + str(info_signal[i][0]) + '_end' + str(info_signal[i][1]) + result)
-        id_lst.append(str(i))
 
         # print(selected_entropy[i])
         # x_fft = np.arange(0, len(deleted_fft[i]))
@@ -182,7 +251,7 @@ def post_num():
         # img_base64 = base64.b64encode(sio.getvalue()).decode('utf8')
         # img_lst.append(img_base64)
 
-    return jsonify({"ids":id_lst, "raw_datas": raw_lst, "fft_datas": fft_lst, "title": title_lst})
+    return jsonify({"ids":id_lst[:10], "raw_datas": raw_lst[:10], "fft_datas": fft_lst[:10], "title": title_lst[:10]})
 
 
 @app.route("/retrain", methods=['POST','GET'])
@@ -191,6 +260,16 @@ def retrain():
     labels = request.get_json()['labels']
     print(ids)
     print(labels)
+    file = pd.read_csv('./labels_csv.csv')
+    f = pd.DataFrame(file)
+
+    print("retrain:")
+    print(f.head())
+
+    for i, id in enumerate(ids):
+        f.loc[int(id), "label"] = labels[i]
+    print(f.head())
+    f.to_csv('./labels_csv.csv', index=False)
     # global X_train, y_train, raw_train, fft_train
     # print(X_train.shape)
     # X_train, y_train, raw_train, fft_train = data_process.add_to_train(deleted_X, deleted_y, deleted_raw, deleted_fft, X_train, y_train, raw_train, fft_train)
