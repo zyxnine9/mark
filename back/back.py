@@ -22,11 +22,10 @@ import pandas as pd
 import math
 
 
-
 app = Flask(__name__)
 CORS(app)
 
-server = True
+server = False
 
 # 线上路径
 if server:
@@ -36,7 +35,7 @@ else:
     origin_path = "../../2020MAR-EMG Labeling Data/"
     path = "./emg_data.h5"
 
-
+path_choosed = None
 data = None
 
 # validation_standard = 0
@@ -47,8 +46,8 @@ info_signal = []
 det_signal = []
 
 # name = 'NAAC_s18081064wct_Train15_HandOpen'
-number = 0
-channel = 1
+# number = 0
+# channel = 1
 
 # CNN部分
 # datas, raw_datas, labels, datas_butter, X_train, X_test, y_train, y_test = data_process.load_data_to_train(path)
@@ -72,7 +71,7 @@ channel = 1
 
 
 # @app.route("/train",methods=['POST'])
-def train():
+def train(name, number, channel):
     # CNN部分
     # global pre_entropy, model
     # model = load_model(model, 'models/little_parameter.pkl')
@@ -107,7 +106,6 @@ def train():
     info_signal = []
     det_signal = []
 
-    name = request.get_json()["groupName"]
     print(name)
     signal = data[name][0][number]
     count = {0: 0, 1: 0}
@@ -135,10 +133,10 @@ def post_num():
     # change by zyx 
     # 测试接口
     name = request.get_json()['groupName']
-    chosen_signal_number = request.get_json()['chosenSignalNumber']
-    chosen_signal_channel = request.get_json()['chosenSignalChannel']
-    print(chosen_signal_channel)
-    print(chosen_signal_number)
+    number = request.get_json()['chosenSignalNumber']
+    channel = request.get_json()['chosenSignalChannel']
+    print(channel)
+    print(number)
     f = csv.reader(open('groups.csv', 'r', encoding='utf-8'))
     grouplist = []
     raw_lst = []
@@ -152,14 +150,14 @@ def post_num():
     print(grouplist)
     begin_index = 0
     end_index = len(open('labels_csv.csv').readlines())-1 if os.path.exists('labels_csv.csv') else 0
-    if name+str(number)+str(channel) in grouplist: # 判断之前是否detect过
+    if path_choosed+name+str(number)+str(channel) in grouplist: # 判断之前是否detect过
         file = pd.read_csv('./labels_csv.csv')
         f = pd.DataFrame(file)
         print(f.head())
         flag = False
         for i, info in enumerate(f.itertuples()):
 
-            if getattr(info, 'group_name') == name and getattr(info, 'number') == number and getattr(info, 'channel') == channel:
+            if getattr(info, 'group_name') == name and getattr(info, 'number') == number and getattr(info, 'channel') == channel and getattr(info, 'file_name') == path_choosed:
 
                 if math.isnan(getattr(info, 'label')) and flag is False:
                     begin_index = i
@@ -188,22 +186,22 @@ def post_num():
     else:
         with open('groups.csv', 'a+', newline='')as f:
             writer = csv.writer(f)
-            tmp = name+str(number)+str(channel)
+            tmp = path_choosed+name+str(number)+str(channel)
             print(tmp)
             writer.writerow([tmp])
             f.close()
-        train()
+        train(name, number, channel)
         keep = train_features.py_cpu_nms(np.array(info_signal), 0.2)
         begin_index = len(open('labels_csv.csv').readlines())-1 if os.path.exists('labels_csv.csv') else 0
         if os.path.exists('labels_csv.csv'):
             file = pd.read_csv('./labels_csv.csv')
             df = pd.DataFrame(file)
         else:
-            df = pd.DataFrame(columns=['group_name', 'number', 'channel', 'start_time', 'end_time', 'label'])
+            df = pd.DataFrame(columns=['file_name','group_name', 'number', 'channel', 'start_time', 'end_time', 'label'])
 
         for i in keep:
 
-            df = df.append({"group_name": name, "number":number, "channel":channel, "start_time":info_signal[i][0], "end_time":info_signal[i][1]}, ignore_index=True)
+            df = df.append({"file_name":path_choosed, "group_name": name, "number":number, "channel":channel, "start_time":info_signal[i][0], "end_time":info_signal[i][1]}, ignore_index=True)
 
         print(df.head())
         df.to_csv('./labels_csv.csv', index=False)
@@ -312,7 +310,7 @@ def post_file():
 @app.route('/group',methods=['POST'])
 def group():
     print(request.get_json()['dataset_name'])
-    global data
+    global data, path_choosed
     path_choosed = request.get_json()['dataset_name']
     data = scio.loadmat(origin_path+path_choosed)
 
@@ -327,8 +325,8 @@ def download():
 @app.route('/number', methods=['GET'])
 def number():
     group_name = request.args.get('groupName')
-    return jsonify({"signalNumber":2})
-
+    print("number", len(data[group_name][0]))
+    return jsonify({"signalNumber":len(data[group_name][0])-1})
 
 
 if __name__ == '__main__':
