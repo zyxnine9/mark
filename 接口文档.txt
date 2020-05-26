@@ -15,8 +15,9 @@
 	参数: json
 	示例:{
 		"chosenFile": "xxx.mat",
-		"chosenImageNumber": 5,
-		"user": "zzz",
+		"chosensignalnumber": 1,
+		"choosensignalchannel",1
+		"groupname": "zzz",
 		
 	}
 	返回:{
@@ -73,5 +74,17 @@
     }
     返回:{
         "group_name":[xxx, xxx, xxx]
+    }
+
+6. 加载group返回number选项
+
+    URL：
+    method：GET， POST
+    参数：
+    示例: {
+        "group_name":"xxx"
+    }
+    返回:{
+        "number": 0 or 1 or 2
     }
 
