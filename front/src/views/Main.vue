@@ -1,122 +1,163 @@
 <template>
   <div>
     <h1 style="text-align:center">Online Annotation System</h1>
-    <!--基本信息填写-->
-    <el-row class="block">
-      <el-col :span="12">File Name</el-col>
-      <el-col :span="12">
-        <el-select
-          class="option"
-          v-model="chosenFile"
-          :disabled="disabled"
-          placeholder="please choose the file"
-        >
-          <el-option v-for="(item,index) in fileList" :key="index" :label="item" :value="item"></el-option>
-        </el-select>
+    <el-row>
+      <!--基本信息填写-->
+      <el-col :span="16">
+        <el-row class="block">
+          <el-col :span="12">File Name</el-col>
+          <el-col :span="12">
+            <el-select
+              class="option"
+              v-model="chosenFile"
+              :disabled="disabled"
+              placeholder="please choose the file"
+            >
+              <el-option v-for="(item,index) in fileList" :key="index" :label="item" :value="item"></el-option>
+            </el-select>
+          </el-col>
+        </el-row>
+        <el-row class="block">
+          <el-col :span="12">Current Group</el-col>
+          <el-col :span="12">
+            <el-select
+              class="option"
+              v-model="groupName"
+              :disabled="disabled || !groupList"
+              placeholder="please choose the group"
+            >
+              <el-option v-for="(item,index) in groupList" :key="index" :label="item" :value="item"></el-option>
+            </el-select>
+          </el-col>
+        </el-row>
+        <el-row class="block">
+          <el-col :span="12">Signal Channel</el-col>
+          <el-col :span="12">
+            <el-select
+              class="option"
+              v-model="chosenSignalChannel"
+              :disabled="disabled"
+              placeholder="please choose the number"
+            >
+              <el-option
+                v-for="(item,index) in markImageNumberOption"
+                :key="index"
+                :label="item"
+                :value="item"
+              ></el-option>
+            </el-select>
+          </el-col>
+        </el-row>
+        <el-row class="block">
+          <el-col :span="12">Signal Number</el-col>
+          <el-col :span="12">
+            <el-select
+              class="option"
+              v-model="chosenSignalNumber"
+              :disabled="disabled || (groupName==null)"
+              placeholder="please choose the number"
+            >
+              <el-option
+                v-for="(item,index) in signalNumberOption"
+                :key="index"
+                :label="item"
+                :value="item"
+              ></el-option>
+            </el-select>
+          </el-col>
+        </el-row>
       </el-col>
-    </el-row>
-    <el-row class="block">
-      <el-col :span="12">Current Group</el-col>
-      <el-col :span="12">
-        <el-select
-          class="option"
-          v-model="groupName"
-          :disabled="disabled || !groupList"
-          placeholder="please choose the group"
-        >
-          <el-option v-for="(item,index) in groupList" :key="index" :label="item" :value="item"></el-option>
-        </el-select>
-      </el-col>
-    </el-row>
-    <el-row class="block">
-      <el-col :span="12">Signal Channel</el-col>
-      <el-col :span="12">
-        <el-select
-          class="option"
-          v-model="chosenSignalChannel"
-          :disabled="disabled"
-          placeholder="please choose the number"
-        >
-          <el-option
-            v-for="(item,index) in markImageNumberOption"
-            :key="index"
-            :label="item"
-            :value="item"
-          ></el-option>
-        </el-select>
-      </el-col>
-    </el-row>
-    <el-row class="block">
-      <el-col :span="12">Signal Number</el-col>
-      <el-col :span="12">
-        <el-select
-          class="option"
-          v-model="chosenSignalNumber"
-          :disabled="disabled || (groupName==null)"
-          placeholder="please choose the number"
-        >
-          <el-option
-            v-for="(item,index) in signalNumberOption"
-            :key="index"
-            :label="item"
-            :value="item"
-          ></el-option>
-        </el-select>
+
+      <!--上传文件-->
+      <el-col :span="8">
+        <el-row class="block">
+          <input style="display: none" type="file" @change="onFileSelected" ref="uploadFile" />
+          <el-button type="primary" @click="$refs.uploadFile.click()">Upload New Dataset</el-button>
+          <span>( .mat format )</span>
+        </el-row>
+        <el-row class="block">
+          <el-button type="primary" v-if="selectedFile != null" @click="onUpload">Upload</el-button>
+          <el-row class="block">
+            <span v-if="selectedFile">Current file is {{ selectedFile.name }}</span>
+          </el-row>
+        </el-row>
+        <el-row class="block">
+          <el-progress
+            v-if="uploadProgress"
+            :text-inside="true"
+            :stroke-width="26"
+            :percentage="uploadProgress"
+          ></el-progress>
+        </el-row>
       </el-col>
     </el-row>
 
-    <!--上传文件-->
+    <!-- 上传信息获取数据-->
     <div style="text-align:center">
-      <input style="display: none" type="file" @change="onFileSelected" ref="uploadFile" />
-      <el-button type="primary" @click="$refs.uploadFile.click()">Choose own dataset</el-button>
-      <el-button type="primary" v-if="selectedFile != null" @click="onUpload">Upload</el-button>
-      <el-row>
-        <span v-if="selectedFile">Current file is {{ selectedFile.name }}</span>
-      </el-row>
-      <el-progress
-        v-if="uploadProgress"
-        :text-inside="true"
-        :stroke-width="26"
-        :percentage="uploadProgress"
-      ></el-progress>
-      <span v-if="uploadHint">{{ uploadHint }}</span>
-    </div>
-    <br />
-
-    <div style="text-align:center">
-      <!-- 上传信息获取数据-->
-      <el-button type="primary" @click="detect" v-loading.fullscreen.lock="fullscreenLoading">Start</el-button>
-
-      <!-- 下载文件 -->
-      <el-button type="primary" @click="$refs.download.click()">Download</el-button>
-      <a style="display:none" ref="download" href="https://www.jackren.cn/mark/api/download">file</a>
+      <el-button
+        type="primary"
+        @click="detect"
+        v-loading.fullscreen.lock="fullscreenLoading"
+      >Start Annotation</el-button>
     </div>
 
     <!--标注模块-->
-    <div v-if="data">
-      <el-carousel
-        :autoplay="false"
-        :loop="false"
-        arrow="never"
-        indicator-position="none"
-        height="80vh"
-        ref="ques"
-      >
-        <el-carousel-item v-for="(item,i) in data.ids.slice(0,chosenImageNumber)" :key="i">
-          <!-- <img v-bind:src="'data:image/jpeg;base64,'+img" /> -->
-          <p>{{data.ids[i]}}</p>
-          <p>{{data.title[i]}}</p>
-          <LineChart :fftdata="data.fft_datas[i]" :rawdata="data.raw_datas[i]" />
-        </el-carousel-item>
-      </el-carousel>
-      <el-row>
-        <el-col v-for="(v, i) in options" :key="i" :span="6">
-          <el-button type="primary" @click="mark(i)">{{ v }}</el-button>
-        </el-col>
-      </el-row>
-      <p>{{labels}}</p>
-      <p>{{index}}</p>
-    </div>
+    <transition name="fade">
+      <div v-if="data">
+        <!-- EMG图例 -->
+        <el-carousel
+          :autoplay="false"
+          :loop="false"
+          arrow="never"
+          indicator-position="none"
+          height="80vh"
+          ref="ques"
+        >
+          <el-carousel-item v-for="(item,i) in data.ids.slice(0,chosenImageNumber)" :key="i">
+            <!-- <img v-bind:src="'data:image/jpeg;base64,'+img" /> -->
+            <el-row>
+              <el-col :span="6">
+                <div class="wrap" @click="showIdAndAnnotation = true">
+                  <el-link type="primary">click here for machine annotation</el-link>
+                </div>
+              </el-col>
+              <transition name="fade">
+                <el-col :span="18" v-show="showIdAndAnnotation">
+                  <p>{{data.ids[i]}}</p>
+                  <p>{{data.title[i]}}</p>
+                </el-col>
+              </transition>
+            </el-row>
+
+            <LineChart :fftdata="data.fft_datas[i]" :rawdata="data.raw_datas[i]" />
+          </el-carousel-item>
+        </el-carousel>
+
+        <el-row style="text-align:center" type="flex" justify="center" :gutter="20">
+          <el-col v-for="(v, i) in options" :key="i" :span="3">
+            <el-button style="width:100%" type="primary" @click="mark(i)">{{ v }}</el-button>
+          </el-col>
+        </el-row>
+
+        <!-- 下载文件 -->
+        <el-row  type="flex" justify="center" :gutter="20" style="text-align:center;margin-top:20px">
+          <el-col  :span="8">
+            <span style="vertical-align: middle;">Current Annotation Number is {{markedImageNumber}}</span>
+          </el-col>
+          <el-col :span="4">
+            <el-button type="primary" @click="$refs.download.click()">Download Annotation Reuslt</el-button>
+          </el-col>
+          <el-col :span="8">
+            <span style="vertical-align: middle;">(.csv format)</span>
+          </el-col>
+        </el-row>
+        <a
+          style="display:none"
+          ref="download"
+          :href=" 'https://www.jackren.cn/mark/api/download?timeline=' + new Date().valueOf()"
+        >file</a>
+      </div>
+    </transition>
 
     <div>
       <el-dialog title="Hint" :visible.sync="dialogVisible" width="30%">
@@ -144,6 +185,7 @@ export default {
       disabled: false,
       uploadProgress: null,
       uploadHint: null,
+      showIdAndAnnotation: false,
 
       selectedFile: null,
       fileList: [1, 2, 3],
@@ -160,7 +202,8 @@ export default {
       options: ["Active", "Rest", "Noisy", "Unknown"],
       index: 0,
       data: null,
-      labels: []
+      labels: [],
+      markedImageNumber: 0,
     };
   },
 
@@ -213,6 +256,15 @@ export default {
     // 获取选择上传的数据集名
     onFileSelected(event) {
       this.selectedFile = event.target.files[0];
+      let format = this.selectedFile.name.split(".");
+      format = format[format.length - 1];
+      if (format != "mat") {
+        this.selectedFile = null;
+        this.$message({
+          type: "warning",
+          message: "please upload a .mat format file"
+        });
+      }
     },
     // 上传自己的数据集到服务器
     onUpload() {
@@ -226,7 +278,9 @@ export default {
               (uploadEvent.loaded / uploadEvent.total) * 100
             );
             if (this.uploadProgress == 100) {
-              this.uploadHint = "上传完成";
+              // this.uploadHint = "success upload";
+              this.$message("success upload");
+              this.selectedFile = null;
             }
           }
         })
@@ -247,7 +301,7 @@ export default {
           groupName: this.groupName,
           chosenFile: this.chosenFile,
           chosenSignalNumber: this.chosenSignalNumber,
-          chosenSignalChannel: this.chosenSignalChannel,
+          chosenSignalChannel: this.chosenSignalChannel
         };
         console.log(info);
         this.fullscreenLoading = true;
@@ -272,6 +326,7 @@ export default {
     // 标记相关功能
     toNext() {
       this.index++;
+      this.markedImageNumber++;
       this.$refs.ques.next();
     },
     canToNextPage() {
@@ -331,5 +386,18 @@ export default {
 .block {
   margin: 8px;
   text-align: center;
+}
+.wrap {
+  display: inline-block;
+  vertical-align: center;
+  margin-top: 10%;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s;
+}
+.fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
+  opacity: 0;
 }
 </style>

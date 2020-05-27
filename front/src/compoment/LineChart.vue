@@ -96,8 +96,6 @@ export default {
           type: "value",
           name: "Amplitude",
           nameGap: 50,
-          max: 0.003,
-          min: 0,
           nameLocation: "center",
           nameTextStyle: {
             fontSize: 18
@@ -154,8 +152,6 @@ export default {
         yAxis: {
           type: "value",
           nameGap: 40,
-          max: 0.09,
-          min: -0.09,
           name: "Voltage",
           nameLocation: "center",
           nameTextStyle: {
