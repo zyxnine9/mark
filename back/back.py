@@ -25,7 +25,7 @@ import math
 app = Flask(__name__)
 CORS(app)
 
-server = False
+server = True
 
 # 线上路径
 if server:

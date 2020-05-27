@@ -16,6 +16,19 @@
       </el-col>
     </el-row>
     <el-row class="block">
+      <el-col :span="12">Current Group</el-col>
+      <el-col :span="12">
+        <el-select
+          class="option"
+          v-model="groupName"
+          :disabled="disabled || !groupList"
+          placeholder="please choose the group"
+        >
+          <el-option v-for="(item,index) in groupList" :key="index" :label="item" :value="item"></el-option>
+        </el-select>
+      </el-col>
+    </el-row>
+    <el-row class="block">
       <el-col :span="12">Signal Channel</el-col>
       <el-col :span="12">
         <el-select
@@ -39,7 +52,7 @@
         <el-select
           class="option"
           v-model="chosenSignalNumber"
-          :disabled="disabled"
+          :disabled="disabled || (groupName==null)"
           placeholder="please choose the number"
         >
           <el-option
@@ -48,19 +61,6 @@
             :label="item"
             :value="item"
           ></el-option>
-        </el-select>
-      </el-col>
-    </el-row>
-    <el-row class="block">
-      <el-col :span="12">Current Group</el-col>
-      <el-col :span="12">
-        <el-select
-          class="option"
-          v-model="groupName"
-          :disabled="disabled"
-          placeholder="please choose the group"
-        >
-          <el-option v-for="(item,index) in groupList" :key="index" :label="item" :value="item"></el-option>
         </el-select>
       </el-col>
     </el-row>
@@ -133,7 +133,7 @@
 <script>
 import axios from "axios";
 import { files, postFile, group, postValue, retrain } from "../assets/api";
-import { number } from '../assets/api'
+import { number } from "../assets/api";
 import LineChart from "../compoment/LineChart";
 
 export default {
@@ -147,10 +147,10 @@ export default {
 
       selectedFile: null,
       fileList: [1, 2, 3],
-      markImageNumberOption: [0,1,2,3],
-      signalNumberOption:[],
+      markImageNumberOption: [0, 1, 2, 3],
+      signalNumberOption: [],
 
-      groupName: "",
+      groupName: null,
       chosenFile: undefined,
       chosenImageNumber: 10,
       chosenSignalChannel: null,
@@ -178,16 +178,15 @@ export default {
     },
     groupName: function() {
       axios
-      .get(number + '?groupName='+this.groupName)
-      .then(res=>{
-        const number = res.data.signalNumber
-        this.signalNumberOption = [...Array(number+1).keys()]
-      })
-      .catch(error=>{
-        console.log(error)
-      })
+        .get(number + "?groupName=" + this.groupName)
+        .then(res => {
+          const number = res.data.signalNumber;
+          this.signalNumberOption = [...Array(number + 1).keys()];
+        })
+        .catch(error => {
+          console.log(error);
+        });
     }
-
   },
 
   computed: {
@@ -247,8 +246,8 @@ export default {
         const info = {
           groupName: this.groupName,
           chosenFile: this.chosenFile,
-          chosenSignalNumber: 1,
-          chosenSignalChannel: 2,
+          chosenSignalNumber: this.chosenSignalNumber,
+          chosenSignalChannel: this.chosenSignalChannel,
         };
         console.log(info);
         this.fullscreenLoading = true;
