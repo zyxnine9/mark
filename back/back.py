@@ -25,7 +25,7 @@ import math
 app = Flask(__name__)
 CORS(app)
 
-server = True
+server = False
 
 # 线上路径
 if server:
@@ -167,6 +167,9 @@ def post_num():
                     end_index = i
                     break
         print(begin_index, end_index)
+        if flag is False:
+            begin_index = 0
+            end_index = 0
         for i in range(begin_index, end_index):
 
             tmp_signal = data[name][0][number][int(f.loc[i, "start_time"]):int(f.loc[i, "end_time"]), channel]
@@ -314,7 +317,7 @@ def group():
     path_choosed = request.get_json()['dataset_name']
     data = scio.loadmat(origin_path+path_choosed)
 
-    return jsonify({'group_name':list(data.keys())})
+    return jsonify({'group_name':list(data.keys())[3:]})
 
 
 @app.route('/download')
