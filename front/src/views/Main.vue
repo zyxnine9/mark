@@ -194,7 +194,7 @@ export default {
 
       groupName: null,
       chosenFile: undefined,
-      chosenImageNumber: 10,
+      // chosenImageNumber: 10,
       chosenSignalChannel: null,
       chosenSignalNumber: null,
 
@@ -206,6 +206,8 @@ export default {
       markedImageNumber: 0,
     };
   },
+
+  
 
   watch: {
     chosenFile: function() {
@@ -239,6 +241,9 @@ export default {
       } else {
         return false;
       }
+    },
+    chosenImageNumber(){
+      return this.data.ids.length
     }
   },
   methods: {
@@ -317,7 +322,7 @@ export default {
           .catch(error => {
             console.log(error);
             this.fullscreenLoading = false;
-            this.$message("网络错误");
+            this.$message("Network Error");
           });
       } else {
         this.$message("please complete the table");
@@ -347,7 +352,7 @@ export default {
       this.labels[this.index] = i;
       if (this.canToNextPage()) this.toNext();
       if (this.canPost()) {
-        this.$message("标注完了");
+        this.$message("This round finished");
       }
     },
     // 上传label
