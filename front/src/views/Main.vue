@@ -95,6 +95,7 @@
     <!-- 上传信息获取数据-->
     <div style="text-align:center">
       <el-button
+        ref="start"
         type="primary"
         @click="detect"
         v-loading.fullscreen.lock="fullscreenLoading"
@@ -161,10 +162,19 @@
 
     <div>
       <el-dialog title="Hint" :visible.sync="dialogVisible" width="30%">
-        <span>You have finished the annotation work, please sumbit the result</span>
+        <span>You have finished the annotation work, the result will automatically submit and get into next round, you can choose not do that</span>
         <span slot="footer" class="dialog-footer">
-          <!-- <el-button @click="dialogVisible = false">Cancel</el-button> -->
+          <el-button @click="index = 0;data = null;labels = [];markedImageNumber=markedImageNumber-10">Cancel</el-button>
           <el-button type="primary" @click="retrain">Accept</el-button>
+        </span>
+      </el-dialog>
+    </div>
+
+        <div>
+      <el-dialog title="Hint" :visible.sync="allFinishedDialogVisible" width="30%">
+        <span>You have finished this part of annotation work, you can choose other group or signal to continue work </span>
+        <span slot="footer" class="dialog-footer">
+          <el-button type="primary" @click="index = 0;data = null;labels = [];">Accept</el-button>
         </span>
       </el-dialog>
     </div>
@@ -188,13 +198,12 @@ export default {
       showIdAndAnnotation: false,
 
       selectedFile: null,
-      fileList: [1, 2, 3],
+      fileList: [],
       markImageNumberOption: [0, 1, 2, 3],
       signalNumberOption: [],
 
       groupName: null,
       chosenFile: undefined,
-      // chosenImageNumber: 10,
       chosenSignalChannel: null,
       chosenSignalNumber: null,
 
@@ -236,6 +245,9 @@ export default {
 
   computed: {
     dialogVisible() {
+      if (this.data  && this.data.ids.length == 0){
+        return false;
+      }
       if (this.index == this.chosenImageNumber) {
         return true;
       } else {
@@ -243,7 +255,17 @@ export default {
       }
     },
     chosenImageNumber(){
-      return this.data.ids.length
+      if(this.data){
+        return this.data.ids.length
+      }
+      return 10;
+      
+    },
+    allFinishedDialogVisible(){
+      if (this.data != null && this.data.ids.length == 0){
+        return true;
+      } 
+      return false;
     }
   },
   methods: {
@@ -316,8 +338,11 @@ export default {
           .post(postValue, info)
           .then(res => {
             this.data = res.data;
-            console.log(this.data);
+            // console.log(this.data);
             this.fullscreenLoading = false;
+            if (this.data.ids.length == 0 ){//标注完
+              this.disabled = false;
+            }
           })
           .catch(error => {
             console.log(error);
@@ -341,19 +366,11 @@ export default {
         this.index < this.chosenImageNumber
       );
     },
-    canPost() {
-      return (
-        this.labels[this.index] != undefined &&
-        // (this.index == this.data.ids.length)
-        this.index == this.chosenImageNumber
-      );
-    },
+
     mark(i) {
       this.labels[this.index] = i;
       if (this.canToNextPage()) this.toNext();
-      if (this.canPost()) {
-        this.$message("This round finished");
-      }
+ 
     },
     // 上传label
     retrain() {
@@ -365,13 +382,14 @@ export default {
       axios
         .post(retrain, info)
         .then(res => {
-          this.$message("finished");
           this.index = 0;
           this.data = null;
           this.labels = [];
+          this.detect()
         })
         .catch(error => {
-          this.$message("error");
+          console.log(error)
+          this.$message("there are errors");
         });
     }
   },
